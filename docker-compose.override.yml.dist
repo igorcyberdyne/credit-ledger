@@ -1,0 +1,21 @@
+services:
+###> doctrine/doctrine-bundle ###
+  php:
+    depends_on: [ database, mailcatcher ]
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8081:8080"
+    networks:
+      - credit_ledger
+  ###< doctrine/doctrine-bundle ###
+###> symfony/mailer ###
+  mailcatcher:
+    image: schickling/mailcatcher
+    ports:
+      - "1080:1080"  # Interface web
+      - "1025:1025"  # SMTP
+    networks:
+      - credit_ledger
+###< symfony/mailer ###
