@@ -23,6 +23,11 @@ services:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
+    App\EventSubscriber\:
+        resource: '../src/EventSubscriber/'
+        autowire: true
+        autoconfigure: true
+
     Symfony\Component\DependencyInjection\ContainerInterface: '@service_container'
     App\:
         resource: '../src/'
