@@ -1,0 +1,62 @@
+name: 'Ekolo Bus App Tests'
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+    paths:
+      - "**"
+  pull_request:
+    types: [synchronize, opened, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout du code
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Build des conteneurs (avec cache Docker)
+      - name: Build containers
+        run: |
+          docker compose build --progress=plain
+
+      # Démarrer les services (SANS nginx, inutile pour les tests)
+      - name: Start Docker Compose
+        run: docker compose up -d php database
+
+      # Attendre que MariaDB soit prêt
+      - name: Wait for DB to be ready
+        run: |
+          echo "Waiting for MariaDB..."
+          for i in {1..30}; do
+            docker compose exec -T database mysqladmin ping -h localhost && break
+            sleep 2
+          done
+
+      # Installer les dépendances via Composer (dans le conteneur php)
+      - name: Install Composer dependencies
+        run: make composer-install
+
+      # Installation des dépendances JS (via npm)...
+      - name: Install NPM dependencies
+        run: make npm-install
+
+      # Compilation Webpack (prod)...
+      - name: Compilation Webpack (prod)
+        run: make npm-prod
+
+      # Lancer les tests dans le conteneur PHP
+      - name: Run full CI pipeline
+        run: make ci
+
+      # Nettoyage
+      - name: Shutdown
+        if: always()
+        run: make down

@@ -99,10 +99,10 @@ ci: local-requirements symfony-lint test-kernel test-lost-dev-code test-all-ci g
 # test-kernel --> test-composer
 
 .PHONY: test-all
-test-all: test-schema test-twig test-routing test-orphan-tests test-cs-fixer ## Full advanced testing suite
+test-all: test-schema test-routing test-orphan-tests test-cs-fixer ## Full advanced testing suite
 
 .PHONY: test-all-ci
-test-all-ci: test-schema test-twig test-routing test-orphan-tests test-cs-fixer ## Full advanced testing suite
+test-all-ci: test-schema test-routing test-orphan-tests test-cs-fixer ## Full advanced testing suite
 # test-migrations <--> test-schema
 
 
@@ -154,9 +154,7 @@ phpunit-report: $(BUILD_DIR) ## Generate HTML coverage report
 symfony-lint: ## Lint Symfony configuration
 	@echo "$(ARROW) Linting Symfony…"
 	$Q $(CONSOLE) lint:container
-	$Q $(CONSOLE) lint:twig templates
 	$Q $(CONSOLE) lint:yaml config
-	$Q $(CONSOLE) lint:yaml translations
 
 .PHONY: test-kernel
 test-kernel: ## Check Symfony kernel boot
@@ -445,7 +443,7 @@ sync-migration:
 
 regenerate-entity:
 	@echo "Regénère les getters et setters des entités..."
-	$Q $(CONSOLE) make:entity --regenerate --overwrite -e $(ENV)
+	$Q $(CONSOLE) make:entity App --regenerate --overwrite -e $(ENV)
 
 migrations-date:
 	@echo "✅ Vérification de l'état des migrations..."

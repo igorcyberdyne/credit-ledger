@@ -1,0 +1,13 @@
+### POST
+POST {{baseUrl}}/api/login
+Content-Type: application/json
+
+{
+    "email": "owner@balto.fr",
+    "password": "owner@balto.fr"
+}
+
+### GET
+GET {{baseUrl}}/api/me
+Accept: application/json
+Authorization: Bearer {{Security.token}}

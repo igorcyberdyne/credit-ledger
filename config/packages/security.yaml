@@ -25,8 +25,9 @@ security:
                 check_path: api_login_check
                 username_path: email
                 password_path: password
-                success_handler: lexik_jwt_authentication.handler.authentication_success
-                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+                success_handler: App\Service\Security\Handler\LoginSuccessHandler
+                failure_handler: App\Service\Security\Handler\LoginFailureHandler
 
         api:
             pattern: ^/api
@@ -38,8 +39,6 @@ security:
     access_control:
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
 
 when@test:
     security:

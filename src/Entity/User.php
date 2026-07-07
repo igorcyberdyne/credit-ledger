@@ -19,6 +19,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'uniq_user_email', columns: ['email'])]
+#[ORM\UniqueConstraint(name: 'uniq_user_phone', columns: ['phone'])]
 class User extends BaseEntitySoftDeletable implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Column(type: 'uuid', unique: true)]
@@ -33,16 +34,15 @@ class User extends BaseEntitySoftDeletable implements UserInterface, PasswordAut
     #[ORM\Column(length: 100)]
     private string $firstname;
 
-    #[Assert\NotBlank]
     #[Assert\Length(max: 100)]
-    #[ORM\Column(length: 100)]
-    private string $lastname;
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $lastname = null;
 
     #[Assert\NotBlank]
     #[Assert\Email]
     #[Assert\Length(max: 180)]
     #[ORM\Column(length: 180)]
-    private string $email;
+    private ?string $email = null;
 
     #[Assert\Length(max: 30)]
     #[ORM\Column(length: 30, nullable: true)]
@@ -111,7 +111,7 @@ class User extends BaseEntitySoftDeletable implements UserInterface, PasswordAut
         return $this->lastname;
     }
 
-    public function setLastname(string $lastname): static
+    public function setLastname(?string $lastname): static
     {
         $this->lastname = $lastname;
 

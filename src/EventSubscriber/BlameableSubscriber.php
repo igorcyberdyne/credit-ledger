@@ -6,7 +6,7 @@ namespace App\EventSubscriber;
 
 use App\Entity\Contracts\BlameableInterface;
 use App\Entity\User;
-use App\Service\Security\CurrentUserProviderInterface;
+use App\Service\Security\Provider\CurrentUserProviderInterface;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\PrePersistEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;

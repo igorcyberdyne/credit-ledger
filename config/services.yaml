@@ -32,9 +32,10 @@ services:
     App\:
         resource: '../src/'
         exclude:
-            - '../src/DTO/'
+            - '../src/Dto/'
             - '../src/Entity/'
             - '../src/Enum/'
             - '../src/Exception/'
             - '../src/Helper/'
+            - '../src/ValueObject/'
             - '../src/Kernel.php'

@@ -8,7 +8,7 @@ use App\Entity\Shop;
 use App\Entity\User;
 use App\Enum\UserRoleEnum;
 use App\Enum\UserStatusEnum;
-use App\Service\Security\SystemUserProvider;
+use App\Service\Security\Provider\SystemUserProvider;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -40,15 +40,14 @@ final class UserFixtures extends BaseFixtures implements DependentFixtureInterfa
 
         $shops = [$balto, $nono];
 
-
         /*
          * Compte System
          */
         $this->createUser(
             manager: $manager,
             shop: $nono,
-            firstname: $this->faker->firstName,
-            lastname: $this->faker->lastName,
+            firstname: 'Gogo',
+            lastname: 'GAMATH',
             email: SystemUserProvider::USER_SYSTEM_EMAIL,
             role: UserRoleEnum::SYSTEM->value
         );
