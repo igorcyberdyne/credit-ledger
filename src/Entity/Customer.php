@@ -8,13 +8,14 @@ use App\Entity\Abstracts\BaseEntitySoftDeletable;
 use App\Entity\Contracts\BlameableInterface;
 use App\Entity\Traits\BlameableTrait;
 use App\Enum\CustomerStatusEnum;
+use App\Repository\CustomerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: CustomerRepository::class)]
 #[ORM\Index(name: 'idx_customer_lastname', columns: ['lastname'])]
 #[ORM\Index(name: 'idx_customer_phone', columns: ['phone'])]
 class Customer extends BaseEntitySoftDeletable implements BlameableInterface

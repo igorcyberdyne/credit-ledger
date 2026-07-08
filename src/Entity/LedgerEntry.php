@@ -7,14 +7,16 @@ namespace App\Entity;
 use App\Entity\Abstracts\BaseEntitySoftDeletable;
 use App\Entity\Contracts\BlameableInterface;
 use App\Entity\Traits\BlameableTrait;
+use App\Enum\CurrencyEnum;
 use App\Enum\LedgerTypeEnum;
 use App\Enum\PaymentMethodEnum;
+use App\Repository\LedgerEntryRepository;
 use App\ValueObject\Money;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: LedgerEntryRepository::class)]
 #[ORM\Index(name: 'idx_ledger_type', columns: ['type'])]
 class LedgerEntry extends BaseEntitySoftDeletable implements BlameableInterface
 {
@@ -168,9 +170,10 @@ class LedgerEntry extends BaseEntitySoftDeletable implements BlameableInterface
     public function __toString(): string
     {
         return sprintf(
-            '%s %.2f €',
+            '%s %.2f %s',
             $this->type->value,
-            Money::fromCents($this->amountInCents)->decimal()
+            Money::fromCents($this->amountInCents)->decimal(),
+            CurrencyEnum::EURO->symbol()
         );
     }
 

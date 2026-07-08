@@ -43,6 +43,7 @@ class MeControllerTest extends BasicWebTestCase
 
             $this->assertEquals(
                 new UserResponseDto(
+                    uuid: $loginResponseDTO->userResponseDTO->uuid,
                     email: 'credit-ledger-app@system.com',
                     firstName: 'Gogo',
                     lastName: 'GAMATH',
