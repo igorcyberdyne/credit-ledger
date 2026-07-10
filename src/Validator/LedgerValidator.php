@@ -21,28 +21,17 @@ final readonly class LedgerValidator
     public function validatePayment(
         Customer $customer,
         CreatePaymentCommand $command,
-        int $balanceInCents,
     ): void {
         new InvalidAmountException()->assertAmountIsPositive(
             $command->amountInCents
         );
 
-        if (
-            $command->amountInCents > $balanceInCents
-        ) {
-            throw new PaymentAmountException('Le montant du paiement est trop élévé');
-        }
-    }
-
-    private function validateAmount(
-        int $amount,
-    ): void {
-        if ($amount <= 0) {
-            throw new InvalidAmountException();
+        if ($customer->getBalanceInCents() <= 0) {
+            throw new PaymentAmountException('Le client ne possède aucune dette.');
         }
 
-        if ($amount > 500_000) {
-            throw new InvalidAmountException('Montant supérieur à 5 000 €.');
+        if ($command->amountInCents > $customer->getBalanceInCents()) {
+            throw new PaymentAmountException('Le paiement est supérieur au solde restant.');
         }
     }
 }

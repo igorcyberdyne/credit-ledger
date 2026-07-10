@@ -13,12 +13,4 @@ class InvalidAmountException extends BusinessException
             throw new InvalidAmountException('Le montant doit être supérieur à zéro.');
         }
     }
-
-    public function assertMaximumAmount(
-        int $amountInCents,
-    ): void {
-        if ($amountInCents > 500_000) {
-            throw new InvalidAmountException('Montant trop élevé.');
-        }
-    }
 }

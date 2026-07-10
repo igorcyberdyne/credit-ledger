@@ -2,7 +2,7 @@
 
 namespace App\Tests\Tools;
 
-use App\DTO\Response\Security\LoginResponseDto;
+use App\DTO\Response\Security\LoginResponse;
 use App\Entity\Shop;
 use App\Entity\User;
 use App\Service\Security\Provider\SystemUserProvider;
@@ -44,7 +44,7 @@ abstract class BasicWebTestCase extends WebTestCase
     public function authenticateUser(
         string $email,
         string $password,
-    ): LoginResponseDto {
+    ): LoginResponse {
         $this->kernelBrowser->request(
             'POST',
             $this->generateUrl('api_login_check'),
@@ -62,8 +62,8 @@ abstract class BasicWebTestCase extends WebTestCase
         $content = $content['data'] ?? null;
         $this->assertNotNull($content);
 
-        /** @var LoginResponseDto $loginResponseDTO */
-        $loginResponseDTO = $this->serializeJsonToDto($content, LoginResponseDto::class);
+        /** @var LoginResponse $loginResponseDTO */
+        $loginResponseDTO = $this->serializeJsonToDto($content, LoginResponse::class);
 
         return $loginResponseDTO;
     }
@@ -76,7 +76,7 @@ abstract class BasicWebTestCase extends WebTestCase
         string $email,
         array $roles = [],
         ?Shop $shop = null,
-    ): LoginResponseDto {
+    ): LoginResponse {
         // Create user
         $em = $this->getEntityManager();
 
@@ -99,7 +99,7 @@ abstract class BasicWebTestCase extends WebTestCase
      * @throws ExceptionInterface
      * @throws \Exception
      */
-    public function authenticateSystemUser(): LoginResponseDto
+    public function authenticateSystemUser(): LoginResponse
     {
         /** @var SystemUserProvider $service */
         $service = $this->getService(SystemUserProvider::class);

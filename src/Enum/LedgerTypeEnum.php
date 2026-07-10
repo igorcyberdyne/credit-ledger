@@ -8,14 +8,12 @@ enum LedgerTypeEnum: string
 {
     case DEBT = 'DEBT';
     case PAYMENT = 'PAYMENT';
-    case ADJUSTMENT = 'ADJUSTMENT';
 
     public function label(): string
     {
         return match ($this) {
             self::DEBT => 'Dette',
             self::PAYMENT => 'Paiement',
-            self::ADJUSTMENT => 'Ajustement',
         };
     }
 
@@ -27,11 +25,6 @@ enum LedgerTypeEnum: string
     public function isPayment(): bool
     {
         return self::PAYMENT === $this;
-    }
-
-    public function isAdjustment(): bool
-    {
-        return self::ADJUSTMENT === $this;
     }
 
     public static function choices(): array

@@ -11,6 +11,12 @@ class CreatePaymentCommand
         #[Assert\Positive]
         public int $amountInCents,
         public PaymentMethodEnum $paymentMethod,
+
+        #[Assert\Length(max: 255)]
+        public ?string $description = null,
+
+        #[Assert\DateTime]
+        public ?string $occurredAt = null,
     ) {
     }
 }

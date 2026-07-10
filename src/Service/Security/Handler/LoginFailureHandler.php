@@ -2,8 +2,8 @@
 
 namespace App\Service\Security\Handler;
 
-use App\Dto\Response\ApiErrorResponse;
-use App\Dto\Response\ApiResponse;
+use App\Dto\Response\Infra\ApiErrorResponse;
+use App\Dto\Response\Infra\ApiResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

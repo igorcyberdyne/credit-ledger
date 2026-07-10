@@ -10,6 +10,7 @@ use App\Entity\Traits\BlameableTrait;
 use App\Enum\CurrencyEnum;
 use App\Enum\LedgerTypeEnum;
 use App\Enum\PaymentMethodEnum;
+use App\Exception\Domain\Ledger\LedgerEntryAlreadyReversedException;
 use App\Repository\LedgerEntryRepository;
 use App\ValueObject\Money;
 use Doctrine\ORM\Mapping as ORM;
@@ -52,6 +53,33 @@ class LedgerEntry extends BaseEntitySoftDeletable implements BlameableInterface
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $occurredAt = null;
+
+    #[ORM\OneToOne(
+        targetEntity: self::class,
+        inversedBy: 'reversal',
+    )]
+    #[ORM\JoinColumn(
+        name: 'reversed_entry_id',
+        referencedColumnName: 'id',
+        nullable: true,
+        onDelete: 'SET NULL',
+    )]
+    /**
+     * Ecriture d'origine.
+     */
+    private ?LedgerEntry $originalEntry = null;
+
+    #[ORM\OneToOne(
+        targetEntity: self::class,
+        mappedBy: 'originalEntry',
+    )]
+    /**
+     * Écriture d'annulation.
+     */
+    private ?LedgerEntry $reversal = null;
+
+    #[ORM\Column]
+    private bool $isReversal = false;
 
     public function __construct()
     {
@@ -162,11 +190,6 @@ class LedgerEntry extends BaseEntitySoftDeletable implements BlameableInterface
         return LedgerTypeEnum::PAYMENT === $this->type;
     }
 
-    public function isAdjustment(): bool
-    {
-        return LedgerTypeEnum::ADJUSTMENT === $this->type;
-    }
-
     public function __toString(): string
     {
         return sprintf(
@@ -192,6 +215,98 @@ class LedgerEntry extends BaseEntitySoftDeletable implements BlameableInterface
     public function setUuid(Uuid $uuid): static
     {
         $this->uuid = $uuid;
+
+        return $this;
+    }
+
+    public function isReversed(): bool
+    {
+        return null !== $this->reversal;
+    }
+
+    public function canBeReversed(): bool
+    {
+        return !$this->isReversed();
+    }
+
+    public function reverse(): LedgerEntry
+    {
+        if (!$this->canBeReversed()) {
+            throw new LedgerEntryAlreadyReversedException('Cette écriture est déjà annulée.');
+        }
+
+        $reverse = new self();
+
+        $reverse
+            ->setCustomer($this->customer)
+            ->setOccurredAt(new \DateTimeImmutable())
+            ->setAmountInCents($this->amountInCents)
+            ->setOriginalEntry($this)
+            ->setDescription(sprintf(
+                'Annulation de %s',
+                $this->description ?? $this->uuid
+            ));
+
+        $reverse->setType(
+            match ($this->type) {
+                LedgerTypeEnum::DEBT => LedgerTypeEnum::PAYMENT,
+                LedgerTypeEnum::PAYMENT => LedgerTypeEnum::DEBT,
+            }
+        );
+
+        return $reverse;
+    }
+
+    public function balanceImpact(): int
+    {
+        return match ($this->getType()) {
+            LedgerTypeEnum::DEBT => $this->amountInCents,
+            LedgerTypeEnum::PAYMENT => -$this->amountInCents,
+        };
+    }
+
+    public function isReversal(): ?bool
+    {
+        return $this->isReversal;
+    }
+
+    public function setIsReversal(bool $isReversal): static
+    {
+        $this->isReversal = $isReversal;
+
+        return $this;
+    }
+
+    public function getOriginalEntry(): ?self
+    {
+        return $this->originalEntry;
+    }
+
+    public function setOriginalEntry(?self $originalEntry): static
+    {
+        $this->originalEntry = $originalEntry;
+
+        return $this;
+    }
+
+    public function getReversal(): ?self
+    {
+        return $this->reversal;
+    }
+
+    public function setReversal(?self $reversal): static
+    {
+        // unset the owning side of the relation if necessary
+        if (null === $reversal && null !== $this->reversal) {
+            $this->reversal->setOriginalEntry(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if (null !== $reversal && $reversal->getOriginalEntry() !== $this) {
+            $reversal->setOriginalEntry($this);
+        }
+
+        $this->reversal = $reversal;
 
         return $this;
     }

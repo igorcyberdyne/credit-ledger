@@ -9,47 +9,38 @@ use App\Entity\Shop;
 use App\Enum\CustomerStatusEnum;
 use App\Exception\Domain\Customer\CustomerAlreadyExistsException;
 use App\Exception\Domain\Customer\CustomerArchivedException;
+use App\Exception\Domain\Customer\CustomerMissingPhoneException;
 use App\Exception\Domain\Customer\CustomerNotFoundException;
-use App\Exception\Domain\Customer\CustomerNotFromShopException;
-use App\Repository\CustomerRepository;
+use App\Service\Domain\Customer\Contracts\GetCustomerServiceInterface;
 
 readonly class CustomerValidator
 {
     public function __construct(
-        private CustomerRepository $customerRepository,
+        private GetCustomerServiceInterface $getCustomerService,
     ) {
     }
 
     public function validateCreate(
         Shop $shop,
-        CreateCustomerCommand $request,
+        CreateCustomerCommand $command,
     ): void {
         $this->validatePhone(
             shop: $shop,
-            phone: $request->phone,
+            phone: $command->phone,
         );
     }
 
     public function validateUpdate(
         Customer $customer,
-        UpdateCustomerCommand $request,
+        UpdateCustomerCommand $command,
     ): void {
         $this->ensureCustomerIsActive($customer);
 
         $this->validatePhone(
             shop: $customer->getShop(),
-            phone: $request->phone,
+            phone: $command->phone,
             ignore: $customer,
         );
-    }
-
-    public function validateOwnership(
-        Customer $customer,
-        Shop $shop,
-    ): void {
-        if ($customer->getShop()->getId() !== $shop->getId()) {
-            throw new CustomerNotFromShopException();
-        }
     }
 
     private function validatePhone(
@@ -58,16 +49,14 @@ readonly class CustomerValidator
         ?Customer $ignore = null,
     ): void {
         if (empty($phone)) {
-            throw new CustomerNotFoundException();
+            throw new CustomerMissingPhoneException();
         }
+
         $phone = trim($phone);
 
-        $existing = $this->customerRepository->findOneBy([
-            'shop' => $shop,
-            'phone' => $phone,
-        ]);
-
-        if (null === $existing) {
+        try {
+            $existing = $this->getCustomerService->getCustomerByPhoneAndShop($phone, $shop);
+        } catch (CustomerNotFoundException) {
             return;
         }
 
@@ -75,7 +64,7 @@ readonly class CustomerValidator
             return;
         }
 
-        throw new CustomerAlreadyExistsException('Ce numéro de téléphone est déjà utilisé.');
+        throw new CustomerAlreadyExistsException();
     }
 
     private function ensureCustomerIsActive(

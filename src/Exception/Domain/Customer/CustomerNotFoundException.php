@@ -8,6 +8,11 @@ class CustomerNotFoundException extends BusinessException
 {
     public function __construct()
     {
-        parent::__construct('Customer not found');
+        parent::__construct('Client non trouvé');
+    }
+
+    public function getHttpStatus(): ?int
+    {
+        return 404;
     }
 }

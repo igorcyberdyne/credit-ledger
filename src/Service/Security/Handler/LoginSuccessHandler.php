@@ -2,8 +2,8 @@
 
 namespace App\Service\Security\Handler;
 
-use App\Dto\Response\ApiSuccessResponse;
-use App\Dto\Response\Security\LoginResponseDto;
+use App\Dto\Response\Infra\ApiSuccessResponse;
+use App\Dto\Response\Security\LoginResponse;
 use App\Entity\User;
 use App\Mapper\UserMapper;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
@@ -33,7 +33,7 @@ final readonly class LoginSuccessHandler implements AuthenticationSuccessHandler
         /** @var User $user */
         $user = $token->getUser();
 
-        $dto = new LoginResponseDto(
+        $dto = new LoginResponse(
             $this->jwtManager->create($user),
             UserMapper::toResponse($user)
         );
