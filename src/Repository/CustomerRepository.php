@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Customer;
 use App\Entity\Shop;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 class CustomerRepository extends ServiceEntityRepository
@@ -40,5 +41,14 @@ class CustomerRepository extends ServiceEntityRepository
             'customersWithDebt' => (int) $result['customersWithDebt'],
             'totalDebtInCents' => (int) $result['totalDebtInCents'],
         ];
+    }
+
+    public function createCustomersLedgerHistoryByShopQueryBuilder(Shop $shop): QueryBuilder
+    {
+        return $this->createQueryBuilder('c')
+            ->innerJoin('c.ledgerEntries', 'l')
+            ->where('c.shop = :shop')
+            ->setParameter('shop', $shop)
+        ;
     }
 }

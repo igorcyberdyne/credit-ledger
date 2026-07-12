@@ -5,9 +5,12 @@ namespace App\Controller\RestApi\Domain;
 use App\Controller\RestApi\ApiController;
 use App\Dto\Command\Customer\CreateCustomerCommand;
 use App\Dto\Command\Customer\UpdateCustomerCommand;
+use App\Dto\Criteria\Customer\PaginationCriteria;
 use App\Service\Domain\Customer\Contracts\CustomerServiceInterface;
+use App\Service\Domain\Ledger\GetCustomersService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -16,7 +19,21 @@ final class CustomerController extends ApiController
 {
     public function __construct(
         private readonly CustomerServiceInterface $customerService,
+        private readonly GetCustomersService $getCustomersService,
     ) {
+    }
+
+    #[Route('/', name: 'index', methods: ['GET'])]
+    public function list(
+        #[MapQueryString]
+        PaginationCriteria $pagination,
+    ): JsonResponse {
+        return $this->apiSuccess(
+            $this->getCustomersService->list(
+                $this->getShop(),
+                $pagination
+            )
+        );
     }
 
     #[Route('/{uuid}', name: 'show', methods: ['GET'])]

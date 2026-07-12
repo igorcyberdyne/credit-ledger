@@ -7,7 +7,6 @@ use App\Dto\Command\Customer\UpdateCustomerCommand;
 use App\Dto\Response\Domain\Customer\CustomerBalanceResponse;
 use App\Dto\Response\Domain\Customer\CustomerResponse;
 use App\Entity\Customer;
-use App\ValueObject\Money;
 
 readonly class CustomerMapper
 {
@@ -52,7 +51,7 @@ readonly class CustomerMapper
             firstname: $customer->getFirstname(),
             lastname: $customer->getLastname(),
             phone: $customer->getPhone(),
-            balance: new Money($customerBalanceResponse?->balanceInCents ?? 0)->decimal(),
+            balance: $customerBalanceResponse,
         );
     }
 }
