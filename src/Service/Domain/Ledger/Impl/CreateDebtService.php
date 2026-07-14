@@ -2,13 +2,15 @@
 
 namespace App\Service\Domain\Ledger\Impl;
 
-use App\Dto\Command\Ledger\CreateDebtCommand;
+use App\Dto\Command\Domain\Ledger\CreateDebtCommand;
 use App\Dto\Response\Domain\Ledger\LedgerEntryResponse;
 use App\Entity\Shop;
+use App\Event\Domain\DebtCreatedEvent;
 use App\Mapper\LedgerEntryMapper;
 use App\Service\Domain\Customer\Contracts\GetCustomerServiceInterface;
 use App\Validator\LedgerValidator;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 readonly class CreateDebtService
 {
@@ -17,6 +19,7 @@ readonly class CreateDebtService
         private LedgerValidator $validator,
         private LedgerEntryMapper $ledgerEntryMapper,
         private GetCustomerServiceInterface $getCustomerService,
+        private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
@@ -41,6 +44,8 @@ readonly class CreateDebtService
                 $this->entityManager->persist($customer);
 
                 $this->entityManager->flush();
+
+                $this->eventDispatcher->dispatch(new DebtCreatedEvent($ledgerEntry));
 
                 return $this->ledgerEntryMapper->toResponse($ledgerEntry);
             }

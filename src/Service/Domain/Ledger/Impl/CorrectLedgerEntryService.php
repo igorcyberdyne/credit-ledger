@@ -2,10 +2,10 @@
 
 namespace App\Service\Domain\Ledger\Impl;
 
-use App\Dto\Command\Ledger\CorrectLedgerEntryCommand;
-use App\Dto\Command\Ledger\CreateDebtCommand;
-use App\Dto\Command\Ledger\CreatePaymentCommand;
-use App\Dto\Command\Ledger\ReverseLedgerEntryCommand;
+use App\Dto\Command\Domain\Ledger\CorrectLedgerEntryCommand;
+use App\Dto\Command\Domain\Ledger\CreateDebtCommand;
+use App\Dto\Command\Domain\Ledger\CreatePaymentCommand;
+use App\Dto\Command\Domain\Ledger\ReverseLedgerEntryCommand;
 use App\Dto\Response\Domain\Ledger\LedgerEntryResponse;
 use App\Entity\LedgerEntry;
 use App\Entity\Shop;
@@ -13,6 +13,7 @@ use App\Enum\LedgerTypeEnum;
 use App\Service\Domain\Ledger\Contracts\GetLedgerServiceInterface;
 use App\ValueObject\Money;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 readonly class CorrectLedgerEntryService
 {
@@ -22,6 +23,7 @@ readonly class CorrectLedgerEntryService
         private CreateDebtService $createDebtService,
         private CreatePaymentService $createPaymentService,
         private GetLedgerServiceInterface $getLedgerService,
+        private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 

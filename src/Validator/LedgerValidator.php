@@ -2,8 +2,8 @@
 
 namespace App\Validator;
 
-use App\Dto\Command\Ledger\CreateDebtCommand;
-use App\Dto\Command\Ledger\CreatePaymentCommand;
+use App\Dto\Command\Domain\Ledger\CreateDebtCommand;
+use App\Dto\Command\Domain\Ledger\CreatePaymentCommand;
 use App\Entity\Customer;
 use App\Exception\Domain\Ledger\InvalidAmountException;
 use App\Exception\Domain\Payment\PaymentAmountException;

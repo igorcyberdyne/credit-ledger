@@ -2,7 +2,7 @@
 
 namespace App\Tests\Service\Domain\Customer\Impl;
 
-use App\Dto\Command\Customer\CreateCustomerCommand;
+use App\Dto\Command\Domain\Customer\CreateCustomerCommand;
 use App\Entity\Customer;
 use App\Entity\Shop;
 use App\Mapper\CustomerMapper;
@@ -26,8 +26,6 @@ class CustomerServiceTest extends TestCase
 
     private CustomerService $service;
 
-    private CustomerBalanceService $customerBalanceService;
-
     private GetCustomerServiceInterface $getCustomerService;
 
     protected function setUp(): void
@@ -38,7 +36,7 @@ class CustomerServiceTest extends TestCase
 
         $this->customerMapper = $this->createMock(CustomerMapper::class);
 
-        $this->customerBalanceService = $this->createMock(CustomerBalanceService::class);
+        $customerBalanceService = $this->createMock(CustomerBalanceService::class);
 
         $this->getCustomerService = $this->createMock(GetCustomerServiceInterface::class);
 
@@ -46,7 +44,7 @@ class CustomerServiceTest extends TestCase
             entityManager: $this->entityManager,
             customerValidator: $this->validator,
             customerMapper: $this->customerMapper,
-            customerBalanceService: $this->customerBalanceService,
+            customerBalanceService: $customerBalanceService,
             getCustomerService: $this->getCustomerService
         );
     }

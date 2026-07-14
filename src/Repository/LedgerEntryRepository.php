@@ -127,7 +127,7 @@ class LedgerEntryRepository extends ServiceEntityRepository
     public function createCustomerHistoryQueryBuilder(
         Customer $customer,
     ): QueryBuilder {
-        return $this->createCustomerQueryBuilder($customer)->orderBy('l.occurredAt', 'DESC');
+        return $this->createCustomerQueryBuilder($customer)->orderBy('l.id', 'DESC');
     }
 
     /**

@@ -2,8 +2,8 @@
 
 namespace App\Mapper;
 
-use App\Dto\Command\Ledger\CreateDebtCommand;
-use App\Dto\Command\Ledger\CreatePaymentCommand;
+use App\Dto\Command\Domain\Ledger\CreateDebtCommand;
+use App\Dto\Command\Domain\Ledger\CreatePaymentCommand;
 use App\Dto\Response\Domain\Ledger\LedgerEntryResponse;
 use App\Entity\Customer;
 use App\Entity\LedgerEntry;

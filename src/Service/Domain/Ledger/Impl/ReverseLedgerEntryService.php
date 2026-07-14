@@ -2,7 +2,7 @@
 
 namespace App\Service\Domain\Ledger\Impl;
 
-use App\Dto\Command\Ledger\ReverseLedgerEntryCommand;
+use App\Dto\Command\Domain\Ledger\ReverseLedgerEntryCommand;
 use App\Dto\Response\Domain\Ledger\LedgerEntryResponse;
 use App\Entity\Shop;
 use App\Exception\Domain\Ledger\LedgerEntryCannotBeReversedException;

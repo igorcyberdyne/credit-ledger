@@ -61,7 +61,7 @@ final class UserFixtures extends BaseFixtures implements DependentFixtureInterfa
             shop: $balto,
             firstname: 'Paul',
             lastname: 'Martin',
-            email: 'owner@balto.fr',
+            email: 'manager@balto.fr',
             role: UserRoleEnum::MANAGER->value,
             reference: self::OWNER_BALTO
         );
@@ -71,7 +71,7 @@ final class UserFixtures extends BaseFixtures implements DependentFixtureInterfa
             shop: $nono,
             firstname: 'Nicolas',
             lastname: 'Petit',
-            email: 'owner@nono.fr',
+            email: 'manager@nono.fr',
             role: UserRoleEnum::MANAGER->value,
             reference: self::OWNER_NONO
         );
