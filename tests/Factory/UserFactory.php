@@ -19,7 +19,7 @@ final class UserFactory extends BaseFactory
     {
         return [
             'email' => self::faker()->unique()->safeEmail(),
-            'roles' => [UserRoleEnum::EMPLOYEE],
+            'roles' => [UserRoleEnum::MANAGER],
             'shop' => ShopFactory::new(),
         ];
     }

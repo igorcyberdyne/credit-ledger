@@ -145,7 +145,13 @@ class User extends BaseEntitySoftDeletable implements UserInterface, PasswordAut
 
     public function getRoles(): array
     {
-        return $this->roles;
+        return array_map(function (mixed $role) {
+            if ($role instanceof UserRoleEnum) {
+                return $role->value;
+            }
+
+            return $role;
+        }, $this->roles);
     }
 
     public function setRoles(array $roles): static
@@ -153,11 +159,6 @@ class User extends BaseEntitySoftDeletable implements UserInterface, PasswordAut
         $this->roles = $roles;
 
         return $this;
-    }
-
-    public function isOwner(): bool
-    {
-        return in_array(UserRoleEnum::OWNER->value, $this->getRoles(), true);
     }
 
     public function isManager(): bool

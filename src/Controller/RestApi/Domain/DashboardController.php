@@ -6,7 +6,9 @@ use App\Controller\RestApi\ApiController;
 use App\Service\Domain\GetDashboardService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+#[IsGranted('ROLE_MANAGER')]
 #[Route('/dashboard', name: 'dashboard_')]
 final class DashboardController extends ApiController
 {

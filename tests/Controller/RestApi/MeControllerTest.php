@@ -39,7 +39,7 @@ class MeControllerTest extends BasicWebTestCase
     public function testMeUserSystem(): void
     {
         $this->wrapInRollback(function () {
-            $loginResponseDTO = $this->fullAuthenticateUser(SystemUserProvider::USER_SYSTEM_EMAIL, [UserRoleEnum::OWNER->value]);
+            $loginResponseDTO = $this->fullAuthenticateUser(SystemUserProvider::USER_SYSTEM_EMAIL, [UserRoleEnum::MANAGER->value]);
 
             $this->assertEquals(
                 new UserResponse(
@@ -66,7 +66,7 @@ class MeControllerTest extends BasicWebTestCase
     public function testMe(): void
     {
         $this->wrapInRollback(function () {
-            $loginResponseDTO = $this->fullAuthenticateUser('me@test.com', [UserRoleEnum::OWNER->value]);
+            $loginResponseDTO = $this->fullAuthenticateUser('me@test.com', [UserRoleEnum::MANAGER->value]);
 
             $userDto = $this->authenticateUserAndRetrieveUserDto($loginResponseDTO->token);
             $this->assertEquals($loginResponseDTO->userResponseDTO->email, $userDto->email);

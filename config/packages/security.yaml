@@ -11,6 +11,11 @@ security:
                 property: email
         # used to reload user from session & other features (e.g. switch_user)
 
+    role_hierarchy:
+        ROLE_MANAGER: ROLE_EMPLOYEE
+        ROLE_SYSTEM: ROLE_MANAGER
+
+
     firewalls:
         dev:
             # Ensure dev tools and static assets are always allowed

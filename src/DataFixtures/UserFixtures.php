@@ -62,7 +62,7 @@ final class UserFixtures extends BaseFixtures implements DependentFixtureInterfa
             firstname: 'Paul',
             lastname: 'Martin',
             email: 'owner@balto.fr',
-            role: UserRoleEnum::OWNER->value,
+            role: UserRoleEnum::MANAGER->value,
             reference: self::OWNER_BALTO
         );
 
@@ -72,7 +72,7 @@ final class UserFixtures extends BaseFixtures implements DependentFixtureInterfa
             firstname: 'Nicolas',
             lastname: 'Petit',
             email: 'owner@nono.fr',
-            role: UserRoleEnum::OWNER->value,
+            role: UserRoleEnum::MANAGER->value,
             reference: self::OWNER_NONO
         );
 
@@ -105,17 +105,13 @@ final class UserFixtures extends BaseFixtures implements DependentFixtureInterfa
 
             $lastname = $this->faker->lastName();
 
-            $role = $this->faker->boolean(15)
-                ? UserRoleEnum::MANAGER->value
-                : UserRoleEnum::EMPLOYEE->value;
-
             $this->createUser(
                 manager: $manager,
                 shop: $this->faker->randomElement($shops),
                 firstname: $firstname,
                 lastname: $lastname,
                 email: $this->faker->unique()->safeEmail(),
-                role: $role,
+                role: UserRoleEnum::EMPLOYEE->value,
                 phone: $this->faker->phoneNumber()
             );
         }
