@@ -1,4 +1,4 @@
-name: 'Ekolo Bus App Tests'
+name: 'CreditBook'
 
 on:
   push:
@@ -43,14 +43,6 @@ jobs:
       # Installer les dépendances via Composer (dans le conteneur php)
       - name: Install Composer dependencies
         run: make composer-install
-
-      # Installation des dépendances JS (via npm)...
-      - name: Install NPM dependencies
-        run: make npm-install
-
-      # Compilation Webpack (prod)...
-      - name: Compilation Webpack (prod)
-        run: make npm-prod
 
       # Lancer les tests dans le conteneur PHP
       - name: Run full CI pipeline

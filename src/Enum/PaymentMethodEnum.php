@@ -37,4 +37,9 @@ enum PaymentMethodEnum: string
             'label'
         );
     }
+
+    public static function required(): array
+    {
+        return array_column(self::cases(), 'value');
+    }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Dto\Response;
+namespace App\Dto\Response\Infra;
 
 use Symfony\Component\Serializer\Attribute\SerializedName;
 

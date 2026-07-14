@@ -7,15 +7,14 @@ namespace App\Enum;
 enum UserRoleEnum: string
 {
     case SYSTEM = 'ROLE_SYSTEM';
-    case OWNER = 'ROLE_OWNER';
     case MANAGER = 'ROLE_MANAGER';
     case EMPLOYEE = 'ROLE_EMPLOYEE';
 
     public function label(): string
     {
         return match ($this) {
-            self::OWNER => 'Propriétaire',
-            self::MANAGER => 'Manager',
+            self::SYSTEM => 'System',
+            self::MANAGER => 'Gérant',
             self::EMPLOYEE => 'Employé',
         };
     }

@@ -2,34 +2,37 @@
 
 namespace App\ValueObject;
 
+use App\Enum\CurrencyEnum;
+
 final readonly class Money
 {
     public function __construct(
-        private int $amount,
+        private int $amountInCents,
+        private CurrencyEnum $currencyEnum = CurrencyEnum::EURO,
     ) {
     }
 
-    public static function fromCents(int $amount): self
+    public static function fromCents(int $amountInCents): self
     {
-        return new self($amount);
+        return new self($amountInCents);
     }
 
-    public static function fromDecimal(string $amount): self
+    public static function fromDecimal(string $amountInCents): self
     {
         return new self(
-            (int) round(((float) $amount) * 100)
+            (int) round(((float) $amountInCents) * 100)
         );
     }
 
     public function cents(): int
     {
-        return $this->amount;
+        return $this->amountInCents;
     }
 
     public function decimal(): string
     {
         return number_format(
-            $this->amount / 100,
+            $this->amountInCents / 100,
             2,
             '.',
             ''
@@ -38,35 +41,35 @@ final readonly class Money
 
     public function format(): string
     {
-        return number_format(
-            $this->amount / 100,
+        return sprintf('%s %s', number_format(
+            $this->amountInCents / 100,
             2,
             ',',
             ' '
-        ).' €';
+        ), $this->currencyEnum->symbol());
     }
 
     public function add(self $money): self
     {
         return new self(
-            $this->amount + $money->amount
+            $this->amountInCents + $money->amountInCents
         );
     }
 
     public function subtract(self $money): self
     {
         return new self(
-            $this->amount - $money->amount
+            $this->amountInCents - $money->amountInCents
         );
     }
 
     public function isPositive(): bool
     {
-        return $this->amount > 0;
+        return $this->amountInCents > 0;
     }
 
     public function isZero(): bool
     {
-        return 0 === $this->amount;
+        return 0 === $this->amountInCents;
     }
 }

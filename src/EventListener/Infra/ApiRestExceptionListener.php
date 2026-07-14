@@ -10,14 +10,22 @@ class ApiRestExceptionListener extends AbstractExceptionListener
 {
     protected function retrieveResponseSetup(Response $response): Response
     {
+        $status = $response->getStatusCode();
         $throwable = $this->event->getThrowable();
         if ($throwable instanceof BusinessException) {
             $code = $throwable->getBusinessCode();
             $message = $throwable->getMessage();
             $details = $throwable->getDetails();
+            if (!empty($throwable->getHttpStatus())) {
+                $status = $throwable->getHttpStatus();
+            }
         } else {
             $code = $response->getStatusCode();
-            $message = Response::$statusTexts[$code] ?? 'Internal Server Error';
+            if ($code >= Response::HTTP_INTERNAL_SERVER_ERROR) {
+                $message = Response::$statusTexts[$code] ?? 'Internal Server Error';
+            } else {
+                $message = $throwable->getMessage();
+            }
             $details = [];
         }
 
@@ -27,6 +35,6 @@ class ApiRestExceptionListener extends AbstractExceptionListener
                 'message' => $message,
                 'details' => $details,
             ],
-        ], $response->getStatusCode(), $response->headers->all());
+        ], $status, $response->headers->all());
     }
 }

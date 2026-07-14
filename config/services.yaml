@@ -16,6 +16,7 @@ parameters:
 
     router.request_context.scheme: '%env(APP_CONTEXT_SCHEME)%'
     router.request_context.host: '%env(APP_CONTEXT_HOST)%'
+    router.request_context.uri: '%env(DEFAULT_URI)%'
 
 services:
     # default configuration for services in *this* file

@@ -11,6 +11,7 @@ use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\PrePersistEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Events;
+use Psr\Log\LoggerInterface;
 
 #[AsDoctrineListener(event: Events::prePersist)]
 #[AsDoctrineListener(event: Events::preUpdate)]
@@ -18,6 +19,7 @@ final readonly class BlameableSubscriber
 {
     public function __construct(
         private CurrentUserProviderInterface $currentUserProvider,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -33,6 +35,8 @@ final readonly class BlameableSubscriber
         $user = $this->currentUserProvider->getUser();
 
         if (!$user instanceof User) {
+            $this->logger->emergency(sprintf('User not found from %s. See %s file ', get_class($this->currentUserProvider), get_class($this)));
+
             return;
         }
 

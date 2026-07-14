@@ -2,8 +2,8 @@
 
 namespace App\Service\Security\Handler;
 
-use App\Dto\Response\ApiErrorResponse;
-use App\Dto\Response\ApiResponse;
+use App\Dto\Response\Infra\ApiErrorResponse;
+use App\Dto\Response\Infra\ApiResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,6 +26,6 @@ final readonly class LoginFailureHandler implements AuthenticationFailureHandler
     {
         $data = new ApiResponse(apiErrorResponse: new ApiErrorResponse('INVALID_CREDENTIALS', 'Invalid credentials'));
 
-        return new JsonResponse($this->serializer->serialize($data, 'json', ['skip_null_values' => true]), 401, json: true);
+        return new JsonResponse($this->serializer->serialize($data, 'json', ['skip_null_values' => true]), Response::HTTP_UNAUTHORIZED, json: true);
     }
 }

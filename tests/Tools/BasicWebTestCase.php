@@ -2,13 +2,17 @@
 
 namespace App\Tests\Tools;
 
-use App\DTO\Response\Security\LoginResponseDto;
+use App\Dto\Response\Infra\ApiErrorResponse;
+use App\Dto\Response\Infra\ApiResponse;
+use App\Dto\Response\Infra\ApiSuccessResponse;
+use App\DTO\Response\Security\LoginResponse;
 use App\Entity\Shop;
 use App\Entity\User;
 use App\Service\Security\Provider\SystemUserProvider;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\AbstractBrowser;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -18,6 +22,8 @@ abstract class BasicWebTestCase extends WebTestCase
     use EntityTrait;
 
     protected ?AbstractBrowser $kernelBrowser = null;
+    protected string $httpHost = '';
+    protected bool $dumpHttpResponse = false;
 
     /**
      * @throws \Exception
@@ -27,6 +33,8 @@ abstract class BasicWebTestCase extends WebTestCase
         parent::setUp();
 
         $this->kernelBrowser = static::createClient();
+
+        $this->httpHost = $this->getContainerInterface()->getParameter('router.request_context.uri');
     }
 
     protected function getContainerInterface(): ContainerInterface
@@ -40,43 +48,41 @@ abstract class BasicWebTestCase extends WebTestCase
 
     /**
      * @throws ExceptionInterface
+     * @throws \Throwable
      */
     public function authenticateUser(
         string $email,
         string $password,
-    ): LoginResponseDto {
-        $this->kernelBrowser->request(
-            'POST',
+    ): LoginResponse {
+        $response = $this->post(
             $this->generateUrl('api_login_check'),
-            server: [
-                'CONTENT_TYPE' => 'application/json',
-            ],
-            content: json_encode([
+            [
                 'email' => $email,
                 'password' => $password,
-            ])
+            ]
         );
 
+        $this->assertOk();
         $this->assertResponseIsSuccessful();
-        $content = json_decode($this->kernelBrowser->getResponse()->getContent(), true);
-        $content = $content['data'] ?? null;
+
+        $content = $response->apiSuccessResponse->data ?? null;
         $this->assertNotNull($content);
 
-        /** @var LoginResponseDto $loginResponseDTO */
-        $loginResponseDTO = $this->serializeJsonToDto($content, LoginResponseDto::class);
+        /** @var LoginResponse $loginResponseDTO */
+        $loginResponseDTO = $this->serializeJsonToDto($content, LoginResponse::class);
 
         return $loginResponseDTO;
     }
 
     /**
      * @throws ExceptionInterface
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function fullAuthenticateUser(
         string $email,
         array $roles = [],
         ?Shop $shop = null,
-    ): LoginResponseDto {
+    ): LoginResponse {
         // Create user
         $em = $this->getEntityManager();
 
@@ -97,9 +103,9 @@ abstract class BasicWebTestCase extends WebTestCase
 
     /**
      * @throws ExceptionInterface
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function authenticateSystemUser(): LoginResponseDto
+    public function authenticateSystemUser(): LoginResponse
     {
         /** @var SystemUserProvider $service */
         $service = $this->getService(SystemUserProvider::class);
@@ -122,5 +128,253 @@ abstract class BasicWebTestCase extends WebTestCase
             sprintf('%s%s', $dtoClass, $isDtoCollection ? '[]' : ''),
             'json'
         );
+    }
+
+    private function formatUri(string $uri): string
+    {
+        // already absolute?
+        if (str_starts_with($uri, 'http://') || str_starts_with($uri, 'https://')) {
+            return $uri;
+        }
+
+        return sprintf('%s/%s', $this->httpHost, ltrim($uri, '/'));
+    }
+
+    protected function get(
+        string $uri,
+        array $query = [],
+        array $headers = [],
+    ): ApiResponse {
+        if ([] !== $query) {
+            $uri .= '?'.http_build_query($query);
+        }
+
+        $this->kernelBrowser->request(
+            method: 'GET',
+            uri: $this->formatUri($uri),
+            server: $this->formatHeaders($headers),
+        );
+
+        return $this->json();
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    protected function post(
+        string $uri,
+        array $payload = [],
+        array $headers = [],
+    ): ApiResponse {
+        $this->kernelBrowser->request(
+            method: 'POST',
+            uri: $this->formatUri($uri),
+            server: $this->formatHeaders($headers),
+            content: json_encode(
+                $payload,
+                JSON_THROW_ON_ERROR
+            ),
+        );
+
+        return $this->json();
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    protected function put(
+        string $uri,
+        array $payload = [],
+        array $headers = [],
+    ): ApiResponse {
+        $this->kernelBrowser->request(
+            method: 'PUT',
+            uri: $this->formatUri($uri),
+            server: $this->formatHeaders($headers),
+            content: json_encode(
+                $payload,
+                JSON_THROW_ON_ERROR
+            ),
+        );
+
+        return $this->json();
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    protected function patch(
+        string $uri,
+        array $payload = [],
+        array $headers = [],
+    ): ApiResponse {
+        $this->kernelBrowser->request(
+            method: 'PATCH',
+            uri: $this->formatUri($uri),
+            server: $this->formatHeaders($headers),
+            content: json_encode(
+                $payload,
+                JSON_THROW_ON_ERROR
+            ),
+        );
+
+        return $this->json();
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    protected function delete(
+        string $uri,
+        array $headers = [],
+    ): ApiResponse {
+        $this->kernelBrowser->request(
+            method: 'DELETE',
+            uri: $this->formatUri($uri),
+            server: $this->formatHeaders($headers),
+        );
+
+        return $this->json(false);
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    private function json(
+        bool $decode = true,
+    ): ApiResponse {
+        $content = $this->kernelBrowser
+            ->getResponse()
+            ->getContent();
+
+        if ($this->dumpHttpResponse) {
+            print_r($content);
+        }
+
+        if (!$decode || '' === $content || false === $content) {
+            return new ApiResponse();
+        }
+
+        $content = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+
+        if (in_array($this->kernelBrowser->getResponse()->getStatusCode(), [200, 201], true)) {
+            return new ApiResponse(
+                $this->serializeJsonToDto($content, ApiSuccessResponse::class)
+            );
+        }
+
+        return new ApiResponse(
+            apiErrorResponse: $this->serializeJsonToDto($content['error'], ApiErrorResponse::class)
+        );
+    }
+
+    /**
+     * Headers par défaut.
+     */
+    private function formatHeaders(
+        array $headers = [],
+    ): array {
+        return array_merge([
+            'CONTENT_TYPE' => 'application/json',
+            'HTTP_ACCEPT' => 'application/json',
+        ], $headers);
+    }
+
+    protected function assertOk(): void
+    {
+        self::assertResponseStatusCodeSame(
+            Response::HTTP_OK
+        );
+    }
+
+    protected function assertCreated(): void
+    {
+        self::assertResponseStatusCodeSame(
+            Response::HTTP_CREATED
+        );
+    }
+
+    protected function assertNoContent(): void
+    {
+        self::assertResponseStatusCodeSame(
+            Response::HTTP_NO_CONTENT
+        );
+    }
+
+    protected function assertBadRequest(): void
+    {
+        self::assertResponseStatusCodeSame(
+            Response::HTTP_BAD_REQUEST
+        );
+    }
+
+    protected function assertUnauthorized(): void
+    {
+        self::assertResponseStatusCodeSame(
+            Response::HTTP_UNAUTHORIZED
+        );
+    }
+
+    protected function assertForbidden(): void
+    {
+        self::assertResponseStatusCodeSame(
+            Response::HTTP_FORBIDDEN
+        );
+    }
+
+    protected function assertNotFound(): void
+    {
+        self::assertResponseStatusCodeSame(
+            Response::HTTP_NOT_FOUND
+        );
+    }
+
+    protected function assertValidationError(): void
+    {
+        self::assertResponseStatusCodeSame(
+            Response::HTTP_UNPROCESSABLE_ENTITY
+        );
+    }
+
+    protected function assertConflict(): void
+    {
+        self::assertResponseStatusCodeSame(
+            Response::HTTP_CONFLICT
+        );
+    }
+
+    protected function assertJsonHasKey(
+        string $key,
+        array $json,
+    ): void {
+        self::assertArrayHasKey(
+            $key,
+            $json
+        );
+    }
+
+    protected function assertJsonValue(
+        string $key,
+        mixed $expected,
+        array $json,
+    ): void {
+        self::assertEquals(
+            $expected,
+            $json[$key]
+        );
+    }
+
+    protected function assertJsonContains(
+        array $expected,
+        array $json,
+    ): void {
+        foreach ($expected as $key => $value) {
+            self::assertArrayHasKey($key, $json);
+
+            self::assertEquals(
+                $value,
+                $json[$key]
+            );
+        }
     }
 }

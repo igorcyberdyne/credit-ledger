@@ -8,13 +8,20 @@ use App\Entity\Abstracts\BaseEntitySoftDeletable;
 use App\Entity\Contracts\BlameableInterface;
 use App\Entity\Traits\BlameableTrait;
 use App\Enum\CustomerStatusEnum;
+use App\Repository\CustomerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: CustomerRepository::class)]
+#[UniqueEntity(fields: ['shop', 'phone'], message: '')]
+#[ORM\UniqueConstraint(
+    name: 'uniq_shop_phone',
+    columns: ['shop_id', 'phone']
+)]
 #[ORM\Index(name: 'idx_customer_lastname', columns: ['lastname'])]
 #[ORM\Index(name: 'idx_customer_phone', columns: ['phone'])]
 class Customer extends BaseEntitySoftDeletable implements BlameableInterface
@@ -49,6 +56,10 @@ class Customer extends BaseEntitySoftDeletable implements BlameableInterface
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photo = null;
+
+    #[Assert\Positive]
+    #[ORM\Column]
+    private int $balanceInCents = 0;
 
     /**
      * @var Collection<int, LedgerEntry>
@@ -210,6 +221,56 @@ class Customer extends BaseEntitySoftDeletable implements BlameableInterface
     public function setUuid(Uuid $uuid): static
     {
         $this->uuid = $uuid;
+
+        return $this;
+    }
+
+    public function getBalanceInCents(): ?int
+    {
+        return $this->balanceInCents;
+    }
+
+    public function setBalanceInCents(int $balanceInCents): static
+    {
+        $this->balanceInCents = $balanceInCents;
+
+        return $this;
+    }
+
+    public function increaseBalance(int $amountInCents): static
+    {
+        if ($amountInCents <= 0) {
+            throw new \InvalidArgumentException();
+        }
+
+        $this->balanceInCents += $amountInCents;
+
+        return $this;
+    }
+
+    public function decreaseBalance(int $amountInCents): static
+    {
+        if ($amountInCents <= 0) {
+            throw new \InvalidArgumentException();
+        }
+
+        if ($amountInCents > $this->balanceInCents) {
+            throw new \LogicException('Balance cannot become negative.');
+        }
+
+        $this->balanceInCents -= $amountInCents;
+
+        return $this;
+    }
+
+    public function applyLedgerEntry(
+        LedgerEntry $entry,
+    ): self {
+        $this->balanceInCents += $entry->balanceImpact();
+
+        if ($this->balanceInCents < 0) {
+            throw new \LogicException('Le solde ne peut pas être négatif.');
+        }
 
         return $this;
     }
