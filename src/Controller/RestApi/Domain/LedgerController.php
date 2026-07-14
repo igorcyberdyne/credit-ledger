@@ -8,6 +8,8 @@ use App\Dto\Command\Ledger\CreateDebtCommand;
 use App\Dto\Command\Ledger\CreatePaymentCommand;
 use App\Dto\Command\Ledger\ReverseLedgerEntryCommand;
 use App\Dto\Criteria\Customer\PaginationCriteria;
+use App\Mapper\LedgerEntryMapper;
+use App\Service\Domain\Ledger\Contracts\GetLedgerServiceInterface;
 use App\Service\Domain\Ledger\Impl\CorrectLedgerEntryService;
 use App\Service\Domain\Ledger\Impl\CreateDebtService;
 use App\Service\Domain\Ledger\Impl\CreatePaymentService;
@@ -22,12 +24,28 @@ use Symfony\Component\Routing\Attribute\Route;
 final class LedgerController extends ApiController
 {
     public function __construct(
+        private readonly GetLedgerServiceInterface $getLedgerService,
         private readonly GetCustomerLedgerService $getCustomerLedgerService,
         private readonly CreateDebtService $createDebtService,
         private readonly CreatePaymentService $createPaymentService,
         private readonly ReverseLedgerEntryService $reverseLedgerEntryService,
         private readonly CorrectLedgerEntryService $correctLedgerEntryService,
     ) {
+    }
+
+    #[Route('/{uuid}', name: 'show', methods: ['GET'])]
+    public function getLedger(
+        string $uuid,
+        LedgerEntryMapper $ledgerEntryMapper,
+    ): JsonResponse {
+        return $this->apiSuccess(
+            $ledgerEntryMapper->toResponse(
+                $this->getLedgerService->getLedgerByUuidAndShop(
+                    $uuid,
+                    $this->getShop(),
+                )
+            )
+        );
     }
 
     #[Route('/customers/{customerUuid}/ledger', name: 'customer_ledger', methods: ['GET'])]
@@ -75,7 +93,7 @@ final class LedgerController extends ApiController
         );
     }
 
-    #[Route('/ledger/{uuid}/reverse', name: 'reverse', methods: ['POST'])]
+    #[Route('/{uuid}/reverse', name: 'reverse', methods: ['POST'])]
     public function reverse(
         string $uuid,
         #[MapRequestPayload]
@@ -90,7 +108,7 @@ final class LedgerController extends ApiController
         );
     }
 
-    #[Route('/ledger/{uuid}/correct', name: 'correct', methods: ['POST'])]
+    #[Route('/{uuid}/correct', name: 'correct', methods: ['POST'])]
     public function correct(
         string $uuid,
         #[MapRequestPayload]

@@ -15,7 +15,7 @@ final class DashboardController extends ApiController
     ) {
     }
 
-    #[Route('/', name: 'index', methods: ['GET'])]
+    #[Route('', name: 'index', methods: ['GET'])]
     public function __invoke(): JsonResponse
     {
         return $this->apiSuccess(

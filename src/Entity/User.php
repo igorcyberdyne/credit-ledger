@@ -8,8 +8,6 @@ use App\Entity\Abstracts\BaseEntitySoftDeletable;
 use App\Enum\UserRoleEnum;
 use App\Enum\UserStatusEnum;
 use App\Repository\UserRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -48,12 +46,6 @@ class User extends BaseEntitySoftDeletable implements UserInterface, PasswordAut
     #[ORM\Column(length: 30, nullable: true)]
     private ?string $phone = null;
 
-    #[ORM\OneToMany(
-        targetEntity: LedgerEntry::class,
-        mappedBy: 'user'
-    )]
-    private Collection $ledgerEntries;
-
     /**
      * @var list<string>
      */
@@ -69,7 +61,6 @@ class User extends BaseEntitySoftDeletable implements UserInterface, PasswordAut
     public function __construct()
     {
         $this->uuid = Uuid::v7();
-        $this->ledgerEntries = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -228,36 +219,6 @@ class User extends BaseEntitySoftDeletable implements UserInterface, PasswordAut
     public function setUuid(Uuid $uuid): static
     {
         $this->uuid = $uuid;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, LedgerEntry>
-     */
-    public function getLedgerEntries(): Collection
-    {
-        return $this->ledgerEntries;
-    }
-
-    public function addLedgerEntry(LedgerEntry $ledgerEntry): static
-    {
-        if (!$this->ledgerEntries->contains($ledgerEntry)) {
-            $this->ledgerEntries->add($ledgerEntry);
-            $ledgerEntry->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeLedgerEntry(LedgerEntry $ledgerEntry): static
-    {
-        if ($this->ledgerEntries->removeElement($ledgerEntry)) {
-            // set the owning side to null (unless already changed)
-            if ($ledgerEntry->getUser() === $this) {
-                $ledgerEntry->setUser(null);
-            }
-        }
 
         return $this;
     }

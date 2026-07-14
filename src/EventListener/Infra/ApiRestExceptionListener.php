@@ -21,7 +21,11 @@ class ApiRestExceptionListener extends AbstractExceptionListener
             }
         } else {
             $code = $response->getStatusCode();
-            $message = Response::$statusTexts[$code] ?? 'Internal Server Error';
+            if ($code >= Response::HTTP_INTERNAL_SERVER_ERROR) {
+                $message = Response::$statusTexts[$code] ?? 'Internal Server Error';
+            } else {
+                $message = $throwable->getMessage();
+            }
             $details = [];
         }
 

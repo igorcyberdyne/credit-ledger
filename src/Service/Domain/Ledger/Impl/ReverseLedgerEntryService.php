@@ -31,13 +31,14 @@ final readonly class ReverseLedgerEntryService
         }
 
         return $this->entityManager->wrapInTransaction(
-            function () use ($ledgerEntry, $command): LedgerEntryResponse {
+            function () use ($shop, $ledgerEntry, $command): LedgerEntryResponse {
                 $customer = $ledgerEntry->getCustomer();
 
                 /**
                  * Création de l'écriture inverse.
                  */
                 $reverseEntry = $ledgerEntry->reverse();
+                $reverseEntry->setShop($shop);
 
                 if (null !== $command->reason) {
                     $reverseEntry->setDescription($command->reason);
@@ -51,7 +52,7 @@ final readonly class ReverseLedgerEntryService
                 /*
                  * Sauvegarde de la nouvelle écriture.
                  */
-                $this->entityManager->persist($ledgerEntry);
+                $this->entityManager->persist($reverseEntry);
 
                 /*
                  * Doctrine détectera automatiquement

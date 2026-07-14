@@ -2,16 +2,19 @@
 
 namespace App\Dto\Command\Ledger;
 
-use App\Enum\LedgerTypeEnum;
 use App\Enum\PaymentMethodEnum;
+use Symfony\Component\Validator\Constraints as Assert;
 
 final class CorrectLedgerEntryCommand
 {
     public function __construct(
-        public LedgerTypeEnum $type,
-        public int $amountInCents,
+        #[Assert\NotBlank(message: 'Le champ amountInCents est obligatoire.')]
+        #[Assert\Positive(message: 'La valeur du champ amountInCents doit être supérieur à 0.')]
+        public ?int $amountInCents,
+
+        #[Assert\Length(max: 255, maxMessage: 'Le champ description doit avoir au maximum {{ limit }} caractères.')]
         public ?string $description,
-        public ?PaymentMethodEnum $paymentMethod,
+        public ?PaymentMethodEnum $paymentMethod = null,
     ) {
     }
 }

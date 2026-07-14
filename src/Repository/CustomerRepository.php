@@ -46,7 +46,7 @@ class CustomerRepository extends ServiceEntityRepository
     public function createCustomersLedgerHistoryByShopQueryBuilder(Shop $shop): QueryBuilder
     {
         return $this->createQueryBuilder('c')
-            ->innerJoin('c.ledgerEntries', 'l')
+            ->leftJoin('c.ledgerEntries', 'l')
             ->where('c.shop = :shop')
             ->setParameter('shop', $shop)
         ;

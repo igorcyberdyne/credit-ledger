@@ -33,10 +33,6 @@ class LedgerEntry extends BaseEntitySoftDeletable implements BlameableInterface
     #[ORM\JoinColumn(nullable: false)]
     private ?Customer $customer = null;
 
-    #[ORM\ManyToOne(inversedBy: 'ledgerEntries')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $user = null;
-
     #[ORM\Column(enumType: LedgerTypeEnum::class)]
     private LedgerTypeEnum $type;
 
@@ -116,18 +112,6 @@ class LedgerEntry extends BaseEntitySoftDeletable implements BlameableInterface
     public function setCustomer(?Customer $customer): static
     {
         $this->customer = $customer;
-
-        return $this;
-    }
-
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
-
-    public function setUser(?User $user): static
-    {
-        $this->user = $user;
 
         return $this;
     }
@@ -243,9 +227,12 @@ class LedgerEntry extends BaseEntitySoftDeletable implements BlameableInterface
             ->setAmountInCents($this->amountInCents)
             ->setOriginalEntry($this)
             ->setDescription(sprintf(
-                'Annulation de %s',
-                $this->description ?? $this->uuid
+                'Annulation%s : %s',
+                !empty($this->getDescription()) ? "({$this->getDescription()})" : '',
+                new Money($this->getAmountInCents(), $this->getShop()->getCurrency())->format(),
             ));
+
+        $this->setReversal($reverse);
 
         $reverse->setType(
             match ($this->type) {

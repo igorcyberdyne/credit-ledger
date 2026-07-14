@@ -13,4 +13,9 @@ class InvalidAmountException extends BusinessException
             throw new InvalidAmountException('Le montant doit être supérieur à zéro.');
         }
     }
+
+    public function getHttpStatus(): ?int
+    {
+        return 422;
+    }
 }

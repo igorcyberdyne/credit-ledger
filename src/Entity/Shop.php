@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Entity\Abstracts\BaseEntitySoftDeletable;
+use App\Enum\CurrencyEnum;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -47,8 +48,8 @@ class Shop extends BaseEntitySoftDeletable
     #[ORM\Column(length: 30, nullable: true)]
     private ?string $phone = null;
 
-    #[ORM\Column(length: 3)]
-    private string $currency = 'EUR';
+    #[ORM\Column(length: 5, nullable: false, enumType: CurrencyEnum::class)]
+    private CurrencyEnum $currency = CurrencyEnum::EURO;
 
     #[ORM\Column(length: 60)]
     private string $timezone = 'Europe/Paris';
@@ -189,18 +190,6 @@ class Shop extends BaseEntitySoftDeletable
         return $this;
     }
 
-    public function getCurrency(): ?string
-    {
-        return $this->currency;
-    }
-
-    public function setCurrency(string $currency): static
-    {
-        $this->currency = $currency;
-
-        return $this;
-    }
-
     public function getTimezone(): ?string
     {
         return $this->timezone;
@@ -311,6 +300,18 @@ class Shop extends BaseEntitySoftDeletable
                 $ledgerEntry->setShop(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCurrency(): ?CurrencyEnum
+    {
+        return $this->currency;
+    }
+
+    public function setCurrency(CurrencyEnum $currency): static
+    {
+        $this->currency = $currency;
 
         return $this;
     }

@@ -33,11 +33,12 @@ readonly class CreatePaymentService
         );
 
         return $this->entityManager->wrapInTransaction(
-            function () use ($customer, $command): LedgerEntryResponse {
+            function () use ($shop, $customer, $command): LedgerEntryResponse {
                 $ledgerEntry = $this->ledgerEntryMapper->fromCreatePaymentCommand(
                     customer: $customer,
                     command: $command,
                 );
+                $ledgerEntry->setShop($shop);
 
                 $customer->decreaseBalance($command->amountInCents);
 

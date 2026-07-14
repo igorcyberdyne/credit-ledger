@@ -18,9 +18,10 @@ final readonly class LedgerEntryMapper
         return new LedgerEntryResponse(
             uuid: $entry->getUuid()->toRfc4122(),
             type: $entry->getType()->value,
+            amount: new Money($entry->getAmountInCents(), $entry->getShop()->getCurrency())->decimal(),
             description: $entry->getDescription(),
-            amount: new Money($entry->getAmountInCents())->decimal(),
-            occurredAt: $entry->getOccurredAt()->format(DATE_ATOM),
+            occurredAt: $entry->getOccurredAt()?->format(DATE_ATOM),
+            paymentMethod: $entry->getPaymentMethod(),
         );
     }
 
@@ -35,7 +36,7 @@ final readonly class LedgerEntryMapper
             ->setType(LedgerTypeEnum::DEBT)
             ->setAmountInCents($command->amountInCents)
             ->setDescription($command->description)
-            ->setOccurredAt(new \DateTimeImmutable($command->occurredAt ?? 'now'));
+            ->setOccurredAt(!empty($command->occurredAt) ? new \DateTimeImmutable($command->occurredAt) : null);
     }
 
     /**
@@ -51,6 +52,6 @@ final readonly class LedgerEntryMapper
             ->setAmountInCents($command->amountInCents)
             ->setPaymentMethod($command->paymentMethod)
             ->setDescription($command->description)
-            ->setOccurredAt(new \DateTimeImmutable($command->occurredAt ?? 'now'));
+            ->setOccurredAt(!empty($command->occurredAt) ? new \DateTimeImmutable($command->occurredAt) : null);
     }
 }

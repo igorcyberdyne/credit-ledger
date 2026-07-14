@@ -7,6 +7,7 @@ use App\Dto\Command\Customer\UpdateCustomerCommand;
 use App\Dto\Response\Domain\Customer\CustomerResponse;
 use App\Entity\Shop;
 use App\Enum\CustomerStatusEnum;
+use App\Exception\Domain\Customer\CustomerNotFoundException;
 use App\Mapper\CustomerMapper;
 use App\Service\Domain\Customer\Contracts\CustomerServiceInterface;
 use App\Service\Domain\Customer\Contracts\GetCustomerServiceInterface;
@@ -40,6 +41,9 @@ readonly class CustomerService implements CustomerServiceInterface
 
             try {
                 $customer = $this->getCustomerService->getCustomerByPhoneAndShop($command->phone, $shop);
+                if (null === $customer->getDeletedAt()) {
+                    throw new CustomerNotFoundException();
+                }
 
                 $reactivatedCustomer = $this->customerMapper->updateEntity(
                     $customer,
@@ -52,6 +56,7 @@ readonly class CustomerService implements CustomerServiceInterface
                 $this->entityManager->flush();
 
                 return $this->customerMapper->toResponse($reactivatedCustomer, $this->customerBalanceService->getStatistics($reactivatedCustomer));
+            } catch (CustomerNotFoundException) {
             } finally {
                 $filters->enable('softdeleteable');
             }

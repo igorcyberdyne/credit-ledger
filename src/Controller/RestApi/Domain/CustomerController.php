@@ -13,8 +13,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-#[Route('/customers', name: 'customer_')]
+#[Route('/customers', name: 'customers_')]
 final class CustomerController extends ApiController
 {
     public function __construct(
@@ -23,7 +24,7 @@ final class CustomerController extends ApiController
     ) {
     }
 
-    #[Route('/', name: 'index', methods: ['GET'])]
+    #[Route('', name: 'index', methods: ['GET'])]
     public function list(
         #[MapQueryString]
         PaginationCriteria $pagination,
@@ -31,7 +32,11 @@ final class CustomerController extends ApiController
         return $this->apiSuccess(
             $this->getCustomersService->list(
                 $this->getShop(),
-                $pagination
+                $pagination,
+                $this->generateUrl(
+                    'api_customers_index',
+                    referenceType: UrlGeneratorInterface::ABSOLUTE_URL
+                ),
             )
         );
     }
@@ -48,7 +53,7 @@ final class CustomerController extends ApiController
         );
     }
 
-    #[Route('/', name: 'create', methods: ['POST'])]
+    #[Route('', name: 'create', methods: ['POST'])]
     public function create(
         #[MapRequestPayload] CreateCustomerCommand $command,
     ): JsonResponse {
@@ -73,7 +78,7 @@ final class CustomerController extends ApiController
         );
     }
 
-    #[Route('/{uuid}', name: 'archive', methods: ['PATCH'])]
+    #[Route('/{uuid}/archive', name: 'archive', methods: ['PATCH'])]
     public function archive(string $uuid): JsonResponse
     {
         $this->customerService->archive($uuid);

@@ -8,6 +8,6 @@ class LedgerEntryCannotBeReversedException extends BusinessException
 {
     public function getHttpStatus(): ?int
     {
-        return 422;
+        return 409;
     }
 }

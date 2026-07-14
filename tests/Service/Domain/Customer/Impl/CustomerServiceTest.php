@@ -113,6 +113,11 @@ class CustomerServiceTest extends TestCase
                 ->method('getFilters')
                 ->willReturn($filters);
 
+            $customer
+                ->expects(self::once())
+                ->method('getDeletedAt')
+                ->willReturn(new \DateTimeImmutable());
+
             $this->getCustomerService
                 ->expects(self::once())
                 ->method('getCustomerByPhoneAndShop')

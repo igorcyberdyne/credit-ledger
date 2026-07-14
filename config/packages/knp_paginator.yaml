@@ -7,8 +7,3 @@ knp_paginator:
         sort_field_name: sort
         sort_direction_name: direction
         distinct: true
-
-    template:
-        pagination: ~
-        sortable: ~
-        filtration: ~

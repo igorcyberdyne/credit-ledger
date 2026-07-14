@@ -25,6 +25,7 @@ readonly class GetCustomersService
     public function list(
         Shop $shop,
         PaginationCriteria $criteria,
+        string $uri,
     ): CustomerListResponse {
         $queryBuilder = $this->customerRepository->createCustomersLedgerHistoryByShopQueryBuilder($shop);
         $pagination = $this->paginator->paginate(
@@ -48,9 +49,8 @@ readonly class GetCustomersService
                 page: $pagination->getCurrentPageNumber(),
                 limit: $pagination->getItemNumberPerPage(),
                 total: $pagination->getTotalItemCount(),
-                pages: (int) ceil(
-                    $pagination->getTotalItemCount() / $pagination->getItemNumberPerPage()
-                ),
+                pages: (int) ceil($pagination->getTotalItemCount() / $pagination->getItemNumberPerPage()),
+                uri: $uri,
             ),
         );
     }

@@ -8,14 +8,16 @@ use Symfony\Component\Validator\Constraints as Assert;
 class CreatePaymentCommand
 {
     public function __construct(
-        #[Assert\Positive]
-        public int $amountInCents,
-        public PaymentMethodEnum $paymentMethod,
+        #[Assert\NotBlank(message: 'Le champ amountInCents est obligatoire.')]
+        #[Assert\Positive(message: 'La valeur du champ amountInCents doit être supérieur à 0.')]
+        public ?int $amountInCents,
 
-        #[Assert\Length(max: 255)]
+        #[Assert\NotBlank(message: 'Le champ paymentMethod est obligatoire.')]
+        public ?PaymentMethodEnum $paymentMethod,
+
+        #[Assert\Length(max: 255, maxMessage: 'Le champ description doit avoir au maximum {{ limit }} caractères.')]
         public ?string $description = null,
 
-        #[Assert\DateTime]
         public ?string $occurredAt = null,
     ) {
     }

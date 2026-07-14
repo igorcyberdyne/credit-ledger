@@ -68,7 +68,6 @@ final class LedgerEntryFixtures extends BaseFixtures implements DependentFixture
         $entry = new LedgerEntry()
             ->setCustomer($customer)
             ->setShop($shop)
-            ->setUser($user)
             ->setType(LedgerTypeEnum::DEBT)
             ->setAmountInCents($amount)
             ->setDescription($this->faker->randomElement(self::PRODUCTS));
@@ -95,7 +94,6 @@ final class LedgerEntryFixtures extends BaseFixtures implements DependentFixture
         $entry = new LedgerEntry()
             ->setCustomer($customer)
             ->setShop($shop)
-            ->setUser($user)
             ->setType(LedgerTypeEnum::PAYMENT)
             ->setPaymentMethod($method)
             ->setAmountInCents($amount)

@@ -7,9 +7,11 @@ use App\Dto\Command\Ledger\CreateDebtCommand;
 use App\Dto\Command\Ledger\CreatePaymentCommand;
 use App\Dto\Command\Ledger\ReverseLedgerEntryCommand;
 use App\Dto\Response\Domain\Ledger\LedgerEntryResponse;
+use App\Entity\LedgerEntry;
 use App\Entity\Shop;
 use App\Enum\LedgerTypeEnum;
 use App\Service\Domain\Ledger\Contracts\GetLedgerServiceInterface;
+use App\ValueObject\Money;
 use Doctrine\ORM\EntityManagerInterface;
 
 readonly class CorrectLedgerEntryService
@@ -42,22 +44,23 @@ readonly class CorrectLedgerEntryService
                 // 1. Annulation de l'écriture existante
                 $this->reverseLedgerEntryService->reverse(
                     $shop,
-                    $ledgerEntry,
-                    new ReverseLedgerEntryCommand(
-                        reason: $command->description ?? 'Correction'
-                    )
+                    $ledgerEntry->getUuid()->toRfc4122(),
+                    new ReverseLedgerEntryCommand()
                 );
 
                 $customer = $ledgerEntry->getCustomer();
 
                 // 2. Création de la nouvelle écriture
-                return match ($command->type) {
+                return match ($ledgerEntry->getType()) {
                     LedgerTypeEnum::DEBT => $this->createDebtService->create(
                         shop: $shop,
                         customerUuid: $customer->getUuid()->toRfc4122(),
                         command: new CreateDebtCommand(
                             amountInCents: $command->amountInCents,
-                            description: $command->description,
+                            description: $this->formatDescription(
+                                $command,
+                                $ledgerEntry
+                            ),
                         ),
                     ),
                     LedgerTypeEnum::PAYMENT => $this->createPaymentService->create(
@@ -66,10 +69,26 @@ readonly class CorrectLedgerEntryService
                         command: new CreatePaymentCommand(
                             amountInCents: $command->amountInCents,
                             paymentMethod: $command->paymentMethod,
+                            description: $this->formatDescription(
+                                $command,
+                                $ledgerEntry
+                            ),
                         ),
                     ),
                 };
             }
+        );
+    }
+
+    private function formatDescription(
+        CorrectLedgerEntryCommand $command,
+        LedgerEntry $ledgerEntry,
+    ): string {
+        return $command->description ?? sprintf(
+            'Correction%s : %s -> %s',
+            !empty($ledgerEntry->getDescription()) ? "({$ledgerEntry->getDescription()})" : '',
+            new Money($ledgerEntry->getAmountInCents(), $ledgerEntry->getShop()->getCurrency())->format(),
+            new Money($command->amountInCents, $ledgerEntry->getShop()->getCurrency())->format(),
         );
     }
 }

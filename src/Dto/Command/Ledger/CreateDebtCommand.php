@@ -7,12 +7,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 class CreateDebtCommand
 {
     public function __construct(
-        public int $amountInCents,
+        #[Assert\NotBlank(message: 'Le champ amountInCents est obligatoire.')]
+        #[Assert\Positive(message: 'La valeur du champ amountInCents doit être supérieur à 0.')]
+        public ?int $amountInCents,
 
-        #[Assert\Length(max: 255)]
+        #[Assert\Length(max: 255, maxMessage: 'Le champ description doit avoir au maximum {{ limit }} caractères.')]
         public ?string $description = null,
 
-        #[Assert\DateTime]
         public ?string $occurredAt = null,
     ) {
     }

@@ -41,7 +41,11 @@ abstract class ApiController extends AbstractController
         string $message = '',
         int $status = Response::HTTP_OK,
     ): JsonResponse {
-        return $this->json(new ApiSuccessResponse($data, $meta, $message ?? ''), $status);
+        return $this->json(
+            data: new ApiSuccessResponse($data, $meta, $message ?? ''),
+            status: $status,
+            context: ['skip_null_values' => true]
+        );
     }
 
     protected function apiCreated(
