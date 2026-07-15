@@ -13,6 +13,11 @@ readonly class CustomerBalanceService
     ) {
     }
 
+    public function getBalanceInCents(Customer $customer): int
+    {
+        return $this->ledgerRepository->getBalance($customer);
+    }
+
     public function getStatistics(Customer $customer): CustomerBalanceResponse
     {
         $customerBalance = $this->ledgerRepository->getStatistics($customer);

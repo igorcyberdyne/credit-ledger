@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Dto\Command\Ledger;
+namespace App\Dto\Command\Domain\Ledger;
 
 use Symfony\Component\Validator\Constraints as Assert;
 

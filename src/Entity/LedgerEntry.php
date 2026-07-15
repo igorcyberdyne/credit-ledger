@@ -74,9 +74,6 @@ class LedgerEntry extends BaseEntitySoftDeletable implements BlameableInterface
      */
     private ?LedgerEntry $reversal = null;
 
-    #[ORM\Column]
-    private bool $isReversal = false;
-
     public function __construct()
     {
         $this->uuid = Uuid::v7();
@@ -250,18 +247,6 @@ class LedgerEntry extends BaseEntitySoftDeletable implements BlameableInterface
             LedgerTypeEnum::DEBT => $this->amountInCents,
             LedgerTypeEnum::PAYMENT => -$this->amountInCents,
         };
-    }
-
-    public function isReversal(): ?bool
-    {
-        return $this->isReversal;
-    }
-
-    public function setIsReversal(bool $isReversal): static
-    {
-        $this->isReversal = $isReversal;
-
-        return $this;
     }
 
     public function getOriginalEntry(): ?self

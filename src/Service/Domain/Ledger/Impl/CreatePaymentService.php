@@ -2,13 +2,16 @@
 
 namespace App\Service\Domain\Ledger\Impl;
 
-use App\Dto\Command\Ledger\CreatePaymentCommand;
+use App\Dto\Command\Domain\Ledger\CreatePaymentCommand;
 use App\Dto\Response\Domain\Ledger\LedgerEntryResponse;
 use App\Entity\Shop;
+use App\Event\Domain\PaymentCreatedEvent;
 use App\Mapper\LedgerEntryMapper;
 use App\Service\Domain\Customer\Contracts\GetCustomerServiceInterface;
+use App\Service\Domain\Customer\Impl\CustomerBalanceService;
 use App\Validator\LedgerValidator;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 readonly class CreatePaymentService
 {
@@ -17,6 +20,8 @@ readonly class CreatePaymentService
         private LedgerValidator $validator,
         private LedgerEntryMapper $ledgerEntryMapper,
         private GetCustomerServiceInterface $getCustomerService,
+        private CustomerBalanceService $customerBalanceService,
+        private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
@@ -28,7 +33,7 @@ readonly class CreatePaymentService
         $customer = $this->getCustomerService->getCustomerByUuidAndShop($customerUuid, $shop);
 
         $this->validator->validatePayment(
-            customer: $customer,
+            customerBalanceInCents: $this->customerBalanceService->getBalanceInCents($customer),
             command: $command,
         );
 
@@ -40,11 +45,11 @@ readonly class CreatePaymentService
                 );
                 $ledgerEntry->setShop($shop);
 
-                $customer->decreaseBalance($command->amountInCents);
-
                 $this->entityManager->persist($ledgerEntry);
 
                 $this->entityManager->flush();
+
+                $this->eventDispatcher->dispatch(new PaymentCreatedEvent($ledgerEntry));
 
                 return $this->ledgerEntryMapper->toResponse($ledgerEntry);
             }

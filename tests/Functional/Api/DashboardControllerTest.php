@@ -13,9 +13,10 @@ final class DashboardControllerTest extends AuthenticatedApiTestCase
 {
     public function testDashboardIsEmpty(): void
     {
-        $json = $this->authenticatedGet('/api/dashboard')->apiSuccessResponse->data;
-
+        $json = $this->authenticatedGet('/api/dashboard');
         $this->assertOk();
+
+        $json = $json->apiSuccessResponse->data;
 
         self::assertSame(0, $json['customers']);
         self::assertSame(0, $json['customersWithDebt']);
@@ -36,9 +37,10 @@ final class DashboardControllerTest extends AuthenticatedApiTestCase
                     'shop' => $this->shop,
                 ]);
 
-        $json = $this->authenticatedGet('/api/dashboard')->apiSuccessResponse->data;
-
+        $json = $this->authenticatedGet('/api/dashboard');
         $this->assertOk();
+
+        $json = $json->apiSuccessResponse->data;
 
         self::assertSame(5, $json['customers']);
         self::assertSame(0, $json['customersWithDebt']);
@@ -49,7 +51,6 @@ final class DashboardControllerTest extends AuthenticatedApiTestCase
         $customer = CustomerFactory::new()
             ->createOneEntity([
                 'shop' => $this->shop,
-                'balanceInCents' => 3000,
             ]);
 
         LedgerEntryFactory::new()
@@ -68,9 +69,10 @@ final class DashboardControllerTest extends AuthenticatedApiTestCase
                 'amountInCents' => 2000,
             ]);
 
-        $json = $this->authenticatedGet('/api/dashboard')->apiSuccessResponse->data;
-
+        $json = $this->authenticatedGet('/api/dashboard');
         $this->assertOk();
+
+        $json = $json->apiSuccessResponse->data;
 
         self::assertSame(1, $json['customers']);
         self::assertSame(1, $json['customersWithDebt']);
@@ -81,36 +83,38 @@ final class DashboardControllerTest extends AuthenticatedApiTestCase
 
     public function testDashboardWithPayments(): void
     {
-        $customer = CustomerFactory::new()
-            ->createOneEntity([
-                'shop' => $this->shop,
-                'balanceInCents' => 500,
-            ]);
+        $this->wrapInRollback(function () {
+            $customer = CustomerFactory::new()
+                ->createOneEntity([
+                    'shop' => $this->shop,
+                ]);
 
-        LedgerEntryFactory::new()
-            ->debt()
-            ->createOneEntity([
-                'shop' => $this->shop,
-                'customer' => $customer,
-                'amountInCents' => 1000,
-            ]);
+            LedgerEntryFactory::new()
+                ->debt()
+                ->createOneEntity([
+                    'shop' => $this->shop,
+                    'customer' => $customer,
+                    'amountInCents' => 1000,
+                ]);
 
-        LedgerEntryFactory::new()
-            ->payment()
-            ->createOneEntity([
-                'shop' => $this->shop,
-                'customer' => $customer,
-                'amountInCents' => 500,
-            ]);
+            LedgerEntryFactory::new()
+                ->payment()
+                ->createOneEntity([
+                    'shop' => $this->shop,
+                    'customer' => $customer,
+                    'amountInCents' => 500,
+                ]);
 
-        $json = $this->authenticatedGet('/api/dashboard')->apiSuccessResponse->data;
+            $json = $this->authenticatedGet('/api/dashboard');
+            $this->assertOk();
 
-        $this->assertOk();
+            $json = $json->apiSuccessResponse->data;
 
-        self::assertSame(2, $json['ledgerEntries']);
-        self::assertSame(1, $json['debts']);
-        self::assertSame(1, $json['payments']);
-        self::assertSame(500, $json['totalDebtInCents']);
+            self::assertSame(2, $json['ledgerEntries']);
+            self::assertSame(1, $json['debts']);
+            self::assertSame(1, $json['payments']);
+            self::assertSame(500, $json['totalDebtInCents']);
+        });
     }
 
     public function testDashboardTodayStatistics(): void
@@ -118,7 +122,6 @@ final class DashboardControllerTest extends AuthenticatedApiTestCase
         $customer = CustomerFactory::new()
             ->createOneEntity([
                 'shop' => $this->shop,
-                'balanceInCents' => 1000,
             ]);
 
         LedgerEntryFactory::new()
@@ -139,9 +142,10 @@ final class DashboardControllerTest extends AuthenticatedApiTestCase
                 'occurredAt' => new \DateTimeImmutable(),
             ]);
 
-        $json = $this->authenticatedGet('/api/dashboard')->apiSuccessResponse->data;
-
+        $json = $this->authenticatedGet('/api/dashboard');
         $this->assertOk();
+
+        $json = $json->apiSuccessResponse->data;
 
         self::assertSame(1000, $json['todayDebtInCents']);
         self::assertSame(400, $json['todayPaymentsInCents']);
@@ -154,7 +158,6 @@ final class DashboardControllerTest extends AuthenticatedApiTestCase
         $customer = CustomerFactory::new()
             ->with([
                 'shop' => $otherShop,
-                'balanceInCents' => 5000,
             ])
             ->create();
 
@@ -166,9 +169,10 @@ final class DashboardControllerTest extends AuthenticatedApiTestCase
                 'amountInCents' => 5000,
             ]);
 
-        $json = $this->authenticatedGet('/api/dashboard')->apiSuccessResponse->data;
-
+        $json = $this->authenticatedGet('/api/dashboard');
         $this->assertOk();
+
+        $json = $json->apiSuccessResponse->data;
 
         self::assertSame(0, $json['customers']);
         self::assertSame(0, $json['customersWithDebt']);
@@ -183,14 +187,12 @@ final class DashboardControllerTest extends AuthenticatedApiTestCase
         $customer1 = CustomerFactory::new()
             ->with([
                 'shop' => $this->shop,
-                'balanceInCents' => 1000,
             ])
             ->create();
 
         $customer2 = CustomerFactory::new()
             ->with([
                 'shop' => $this->shop,
-                'balanceInCents' => 2000,
             ])
             ->create();
 
@@ -212,9 +214,10 @@ final class DashboardControllerTest extends AuthenticatedApiTestCase
             ])
             ->create();
 
-        $json = $this->authenticatedGet('/api/dashboard')->apiSuccessResponse->data;
-
+        $json = $this->authenticatedGet('/api/dashboard');
         $this->assertOk();
+
+        $json = $json->apiSuccessResponse->data;
 
         self::assertSame(2, $json['customers']);
         self::assertSame(2, $json['customersWithDebt']);

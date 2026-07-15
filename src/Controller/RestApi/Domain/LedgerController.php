@@ -3,10 +3,10 @@
 namespace App\Controller\RestApi\Domain;
 
 use App\Controller\RestApi\ApiController;
-use App\Dto\Command\Ledger\CorrectLedgerEntryCommand;
-use App\Dto\Command\Ledger\CreateDebtCommand;
-use App\Dto\Command\Ledger\CreatePaymentCommand;
-use App\Dto\Command\Ledger\ReverseLedgerEntryCommand;
+use App\Dto\Command\Domain\Ledger\CorrectLedgerEntryCommand;
+use App\Dto\Command\Domain\Ledger\CreateDebtCommand;
+use App\Dto\Command\Domain\Ledger\CreatePaymentCommand;
+use App\Dto\Command\Domain\Ledger\ReverseLedgerEntryCommand;
 use App\Dto\Criteria\Customer\PaginationCriteria;
 use App\Mapper\LedgerEntryMapper;
 use App\Service\Domain\Ledger\Contracts\GetLedgerServiceInterface;

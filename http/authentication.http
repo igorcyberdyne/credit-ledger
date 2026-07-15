@@ -1,13 +1,89 @@
-### POST
+### Authentification
 POST {{baseUrl}}/api/login
 Content-Type: application/json
 
 {
-    "email": "owner@balto.fr",
-    "password": "owner@balto.fr"
+    "email": "manager@balto.fr",
+    "password": "manager@balto.fr"
 }
 
-### GET
+### Voir mes infos
 GET {{baseUrl}}/api/me
 Accept: application/json
 Authorization: Bearer {{Security.token}}
+
+
+### Création d'un client
+POST {{baseUrl}}/api/customers
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{Security.token}}
+
+{
+    "firstname": "Igor",
+    "lastname": "GAMATH",
+    "phone": "+33650102834",
+    "note": "Client créé depuis un fichier .http"
+}
+
+
+### Récupérer un client
+@customerUuid = 019f62a2-ac1b-7d4b-bf0d-f896f7c7c932
+GET {{baseUrl}}/api/customers/{{customerUuid}}
+Accept: application/json
+Authorization: Bearer {{Security.token}}
+
+
+### Liste des opération d'un client
+GET {{baseUrl}}/api/ledgers/customers/{{customerUuid}}/ledger
+Accept: application/json
+Authorization: Bearer {{Security.token}}
+
+
+### Création d'une dette au client
+POST {{baseUrl}}/api/ledgers/customers/{{customerUuid}}/debts
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{Security.token}}
+
+{
+    "amountInCents": 1500,
+    "description": "Dette pour une palette d'eau christaline de la facture #12345",
+    "occurredAt": "2026-07-14T10:30:00+02:00"
+}
+
+### Création d'un paiement de dette pour client
+POST {{baseUrl}}/api/ledgers/customers/{{customerUuid}}/payments
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{Security.token}}
+
+{
+    "amountInCents": 1000,
+    "paymentMethod": "CASH",
+    "occurredAt": "2026-07-15T00:30:00+02:00"
+}
+
+### Corriger un paiement de dette pour client
+@ledgerUuid = 019f62c0-c5cb-7e3e-b8d9-b9985d51e35b
+POST {{baseUrl}}/api/ledgers/{{ledgerUuid}}/correct
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{Security.token}}
+
+{
+    "amountInCents": 700,
+    "paymentMethod": "CASH",
+    "description": "Correction du paiement précédent. La facture #12345",
+    "occurredAt": "2026-07-15T00:30:00+02:00"
+}
+
+### Annuler une dette client
+POST {{baseUrl}}/api/ledgers/{{ledgerUuid}}/reverse
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{Security.token}}
+
+{
+
+}

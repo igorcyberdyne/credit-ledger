@@ -12,6 +12,7 @@ use App\Enum\LedgerTypeEnum;
 use App\Enum\PaymentMethodEnum;
 use App\Repository\CustomerRepository;
 use App\Repository\LedgerEntryRepository;
+use App\Service\Domain\Customer\Impl\CustomerBalanceService;
 use App\Tests\Factory\CustomerFactory;
 use App\Tests\Factory\LedgerEntryFactory;
 use App\Tests\Factory\ShopFactory;
@@ -23,6 +24,7 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
 {
     private CustomerRepository $customerRepository;
     private LedgerEntryRepository $ledgerRepository;
+    private CustomerBalanceService $customerBalanceService;
 
     private function findLedgerEntry(string $uuid, ?Shop $shop = null): LedgerEntry
     {
@@ -174,6 +176,7 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
 
         $this->customerRepository = $this->getEntityManager()->getRepository(Customer::class);
         $this->ledgerRepository = $this->getEntityManager()->getRepository(LedgerEntry::class);
+        $this->customerBalanceService = $this->getService(CustomerBalanceService::class);
     }
 
     /**
@@ -260,23 +263,25 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
      */
     public function testCannotCreateDebtForAnotherShopCustomer(): void
     {
-        $otherShop = ShopFactory::new()
-            ->create();
+        $this->wrapInRollback(function (): void {
+            $otherShop = ShopFactory::new()
+                ->create();
 
-        $customer = CustomerFactory::new()
-            ->with([
-                'shop' => $otherShop,
-            ])
-            ->create();
+            $customer = CustomerFactory::new()
+                ->with([
+                    'shop' => $otherShop,
+                ])
+                ->create();
 
-        $this->createDebt(
-            $customer,
-            1000,
-            true,
-            function (): void {
-                $this->assertNotFound();
-            }
-        );
+            $this->createDebt(
+                $customer,
+                1000,
+                true,
+                function (): void {
+                    $this->assertNotFound();
+                }
+            );
+        });
     }
 
     public function testCustomerNotFound(): void
@@ -290,84 +295,88 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
 
     public function testGetCustomerLedger(): void
     {
-        $customer = CustomerFactory::new()
-            ->with([
-                'shop' => $this->shop,
-            ])
-            ->create();
+        $this->wrapInRollback(function (): void {
+            $customer = CustomerFactory::new()
+                ->with([
+                    'shop' => $this->shop,
+                ])
+                ->create();
 
-        LedgerEntryFactory::new()
-            ->debt()
-            ->with([
-                'shop' => $this->shop,
-                'customer' => $customer,
-                'amountInCents' => 1000,
-            ])
-            ->create();
+            LedgerEntryFactory::new()
+                ->debt()
+                ->with([
+                    'shop' => $this->shop,
+                    'customer' => $customer,
+                    'amountInCents' => 1000,
+                ])
+                ->create();
 
-        LedgerEntryFactory::new()
-            ->payment()
-            ->with([
-                'shop' => $this->shop,
-                'customer' => $customer,
-                'amountInCents' => 300,
-                'paymentMethod' => PaymentMethodEnum::CASH,
-            ])
-            ->create();
+            LedgerEntryFactory::new()
+                ->payment()
+                ->with([
+                    'shop' => $this->shop,
+                    'customer' => $customer,
+                    'amountInCents' => 300,
+                    'paymentMethod' => PaymentMethodEnum::CASH,
+                ])
+                ->create();
 
-        $json = $this->authenticatedGet(
-            sprintf(
-                '/api/ledgers/customers/%s/ledger',
-                $customer->getUuid(),
-            )
-        )->apiSuccessResponse->data;
+            $json = $this->authenticatedGet(
+                sprintf(
+                    '/api/ledgers/customers/%s/ledger',
+                    $customer->getUuid(),
+                )
+            )->apiSuccessResponse->data;
 
-        $this->assertOk();
+            $this->assertOk();
 
-        self::assertArrayHasKey('entries', $json);
-        self::assertCount(2, $json['entries']);
+            self::assertArrayHasKey('entries', $json);
+            self::assertCount(2, $json['entries']);
+        });
     }
 
     public function testGetCustomerLedgerWithPagination(): void
     {
-        $customer = CustomerFactory::new()
-            ->with([
-                'shop' => $this->shop,
-            ])
-            ->create();
-
-        LedgerEntryFactory::new()
-            ->debt()
-            ->createManyEntities(
-                25,
-                [
+        $this->wrapInRollback(function (): void {
+            $customer = CustomerFactory::new()
+                ->with([
                     'shop' => $this->shop,
-                    'customer' => $customer,
-                ]);
+                ])
+                ->create();
 
-        $json = $this->authenticatedGet(
-            sprintf(
-                '/api/ledgers/customers/%s/ledger?page=2&limit=10',
-                $customer->getUuid(),
-            )
-        )->apiSuccessResponse->data;
+            LedgerEntryFactory::new()
+                ->debt()
+                ->createManyEntities(
+                    25,
+                    [
+                        'shop' => $this->shop,
+                        'customer' => $customer,
+                    ]);
 
-        $this->assertOk();
+            $json = $this->authenticatedGet(
+                sprintf(
+                    '/api/ledgers/customers/%s/ledger?page=2&limit=10',
+                    $customer->getUuid(),
+                )
+            )->apiSuccessResponse->data;
 
-        self::assertCount(
-            10,
-            $json['entries'],
-        );
+            $this->assertOk();
 
-        self::assertSame(
-            25,
-            $json['pagination']['total'],
-        );
+            self::assertCount(
+                10,
+                $json['entries'],
+            );
 
-        self::assertSame(
-            2,
-            $json['pagination']['page'],
-        );
+            self::assertSame(
+                25,
+                $json['pagination']['total'],
+            );
+
+            self::assertSame(
+                2,
+                $json['pagination']['page'],
+            );
+        });
     }
 
     // ---------------------------------
@@ -379,32 +388,34 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
      */
     public function testCreateDebt(): void
     {
-        $customer = CustomerFactory::new()
-            ->with([
-                'shop' => $this->shop,
-            ])
-            ->create();
+        $this->wrapInRollback(function (): void {
+            $customer = CustomerFactory::new()
+                ->with([
+                    'shop' => $this->shop,
+                ])
+                ->create();
 
-        $json = $this->createDebt($customer, 2500);
+            $json = $this->createDebt($customer, 2500);
 
-        self::assertSame(
-            new Money(2500)->decimal(),
-            $json['amount'],
-        );
-        self::assertSame(
-            '25.00',
-            $json['amount'],
-        );
+            self::assertSame(
+                new Money(2500)->decimal(),
+                $json['amount'],
+            );
+            self::assertSame(
+                '25.00',
+                $json['amount'],
+            );
 
-        self::assertSame(
-            'DEBT',
-            $json['type'],
-        );
+            self::assertSame(
+                'DEBT',
+                $json['type'],
+            );
 
-        self::assertSame(
-            'Courses alimentaires',
-            $json['description'],
-        );
+            self::assertSame(
+                'Courses alimentaires',
+                $json['description'],
+            );
+        });
     }
 
     // ---------------------------------
@@ -416,29 +427,32 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
      */
     public function testCreatePayment(): void
     {
-        $customer = CustomerFactory::new()
-            ->with([
-                'shop' => $this->shop,
-                'balanceInCents' => 5000,
-            ])
-            ->create();
+        $this->wrapInRollback(function (): void {
+            $customer = CustomerFactory::new()
+                ->with([
+                    'shop' => $this->shop,
+                ])
+                ->create();
 
-        $json = $this->createPayment($customer, 2000);
+            $this->createDebt($customer, 5000);
 
-        self::assertSame(
-            'PAYMENT',
-            $json['type'],
-        );
+            $json = $this->createPayment($customer, 2000);
 
-        self::assertSame(
-            '20.00',
-            $json['amount'],
-        );
+            self::assertSame(
+                'PAYMENT',
+                $json['type'],
+            );
 
-        self::assertSame(
-            'CASH',
-            $json['paymentMethod'],
-        );
+            self::assertSame(
+                '20.00',
+                $json['amount'],
+            );
+
+            self::assertSame(
+                'CASH',
+                $json['paymentMethod'],
+            );
+        });
     }
 
     // ---------------------------------
@@ -534,7 +548,7 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
 
             self::assertSame(
                 0,
-                $customer->getBalanceInCents(),
+                $this->customerBalanceService->getBalanceInCents($customer),
             );
         });
     }
@@ -557,7 +571,7 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
             $customer = $this->customerRepository->find($customer->getId());
             self::assertSame(
                 500,
-                $customer->getBalanceInCents(),
+                $this->customerBalanceService->getBalanceInCents($customer),
             );
 
             $entry = $this->createPayment($customer, 500, true);
@@ -591,7 +605,7 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
             $customer = $this->customerRepository->find($customer->getId());
             self::assertSame(
                 500,
-                $customer->getBalanceInCents(),
+                $this->customerBalanceService->getBalanceInCents($customer),
             );
         });
     }
@@ -759,7 +773,7 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
 
             self::assertSame(
                 1800,
-                $customer->getBalanceInCents(),
+                $this->customerBalanceService->getBalanceInCents($customer),
             );
 
             self::assertCount(
@@ -773,7 +787,12 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
     {
         $this->wrapInRollback(function (EntityManagerInterface $entityManager): void {
             $customer = $this->createCustomer();
-            $customer->increaseBalance(2000);
+
+            $this->createDebt(
+                $customer,
+                2000,
+                true
+            );
 
             $payment = $this->createPayment(
                 $customer,
@@ -824,10 +843,10 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
 
             self::assertSame(
                 1200,
-                $customer->getBalanceInCents(),
+                $this->customerBalanceService->getBalanceInCents($customer),
             );
             self::assertCount(
-                3,
+                4,
                 $customer->getLedgerEntries()
             );
         });
@@ -927,19 +946,21 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
      */
     public function testCreateDebtValidationAmountIsRequired(): void
     {
-        $customer = $this->createCustomer();
+        $this->wrapInRollback(function (): void {
+            $customer = $this->createCustomer();
 
-        $this->authenticatedPost(
-            sprintf(
-                '/api/ledgers/customers/%s/debts',
-                $customer->getUuid()->toRfc4122(),
-            ),
-            [
-                'description' => 'Courses alimentaires',
-            ],
-        );
+            $this->authenticatedPost(
+                sprintf(
+                    '/api/ledgers/customers/%s/debts',
+                    $customer->getUuid()->toRfc4122(),
+                ),
+                [
+                    'description' => 'Courses alimentaires',
+                ],
+            );
 
-        $this->assertValidationError();
+            $this->assertValidationError();
+        });
     }
 
     /**
@@ -947,28 +968,34 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
      */
     public function testCreateDebtValidationAmountMustBePositive(): void
     {
-        $customer = $this->createCustomer();
+        $this->wrapInRollback(function (): void {
+            $customer = $this->createCustomer();
 
-        $this->authenticatedPost(
-            sprintf(
-                '/api/ledgers/customers/%s/debts',
-                $customer->getUuid(),
-            ),
-            [
-                'amountInCents' => -100,
-                'description' => 'Courses',
-            ],
-        );
+            $this->authenticatedPost(
+                sprintf(
+                    '/api/ledgers/customers/%s/debts',
+                    $customer->getUuid(),
+                ),
+                [
+                    'amountInCents' => -100,
+                    'description' => 'Courses',
+                ],
+            );
 
-        $this->assertValidationError();
+            $this->assertValidationError();
+        });
     }
 
     public function testCreatePaymentValidationPaymentMethod(): void
     {
-        $this->wrapInRollback(function (EntityManagerInterface $entityManager): void {
+        $this->wrapInRollback(function (): void {
             $customer = $this->createCustomer($this->shop);
-            $customer->increaseBalance(1000);
-            $entityManager->flush();
+
+            $this->createDebt(
+                $customer,
+                1000,
+                true
+            );
 
             $this->authenticatedPost(
                 sprintf(
@@ -987,10 +1014,14 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
 
     public function testCreatePaymentValidationAmount(): void
     {
-        $this->wrapInRollback(function (EntityManagerInterface $entityManager): void {
+        $this->wrapInRollback(function (): void {
             $customer = $this->createCustomer($this->shop);
-            $customer->increaseBalance(1000);
-            $entityManager->flush();
+
+            $this->createDebt(
+                $customer,
+                1000,
+                true
+            );
 
             $this->authenticatedPost(
                 sprintf(

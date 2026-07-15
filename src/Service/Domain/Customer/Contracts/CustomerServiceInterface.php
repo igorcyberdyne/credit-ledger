@@ -2,8 +2,8 @@
 
 namespace App\Service\Domain\Customer\Contracts;
 
-use App\Dto\Command\Customer\CreateCustomerCommand;
-use App\Dto\Command\Customer\UpdateCustomerCommand;
+use App\Dto\Command\Domain\Customer\CreateCustomerCommand;
+use App\Dto\Command\Domain\Customer\UpdateCustomerCommand;
 use App\Dto\Response\Domain\Customer\CustomerResponse;
 use App\Entity\Shop;
 

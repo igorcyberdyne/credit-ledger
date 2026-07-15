@@ -19,7 +19,7 @@ readonly class GetDashboardService
         Shop $shop,
     ): DashboardResponse {
         $customerStatistics = $this->customerRepository
-            ->getDashboardStatistics($shop);
+            ->getCustomersDebtStatistics($shop);
 
         $ledgerStatistics = $this->ledgerEntryRepository
             ->getDashboardStatistics($shop);
