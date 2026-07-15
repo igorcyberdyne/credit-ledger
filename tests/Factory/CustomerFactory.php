@@ -21,7 +21,6 @@ final class CustomerFactory extends BaseFactory
             'firstname' => self::faker()->firstName(),
             'lastname' => self::faker()->lastName(),
             'phone' => self::faker()->phoneNumber(),
-            'balanceInCents' => 0,
         ];
     }
 

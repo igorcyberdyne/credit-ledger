@@ -13,8 +13,9 @@ use Doctrine\Persistence\ManagerRegistry;
 
 class LedgerEntryRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
-    {
+    public function __construct(
+        ManagerRegistry $registry,
+    ) {
         parent::__construct($registry, LedgerEntry::class);
     }
 
@@ -27,9 +28,7 @@ class LedgerEntryRepository extends ServiceEntityRepository
 
     public function getBalance(Customer $customer): int
     {
-        $qb = $this->createQueryBuilder('l');
-
-        $balance = $qb
+        $query = $this->createQueryBuilder('l')
             ->select(
                 'COALESCE(SUM(
                     CASE
@@ -43,8 +42,13 @@ class LedgerEntryRepository extends ServiceEntityRepository
             ->setParameter('customer', $customer)
             ->setParameter('debt', LedgerTypeEnum::DEBT)
             ->setParameter('payment', LedgerTypeEnum::PAYMENT)
-            ->getQuery()
-            ->getSingleScalarResult();
+            ->getQuery();
+
+        try {
+            $balance = $query->getSingleScalarResult();
+        } catch (\Throwable) {
+            $balance = 0;
+        }
 
         return max(0, (int) $balance);
     }
@@ -79,7 +83,7 @@ class LedgerEntryRepository extends ServiceEntityRepository
 
     public function getStatistics(Customer $customer): CustomerBalance
     {
-        $result = $this->createQueryBuilder('l')
+        $query = $this->createQueryBuilder('l')
             ->select(
                 '
                 COALESCE(SUM(
@@ -113,8 +117,13 @@ class LedgerEntryRepository extends ServiceEntityRepository
             ->setParameter('customer', $customer)
             ->setParameter('debt', LedgerTypeEnum::DEBT)
             ->setParameter('payment', LedgerTypeEnum::PAYMENT)
-            ->getQuery()
-            ->getSingleResult();
+            ->getQuery();
+
+        try {
+            $result = $query->getSingleResult();
+        } catch (\Throwable) {
+            $result = [];
+        }
 
         return new CustomerBalance(
             balanceInCents: max(0, (int) $result['balance']),
@@ -143,7 +152,7 @@ class LedgerEntryRepository extends ServiceEntityRepository
         Shop $shop,
     ): array {
         $today = new \DateTimeImmutable('today');
-        $result = $this->createQueryBuilder('l')
+        $query = $this->createQueryBuilder('l')
             ->select([
                 'COUNT(l.id) AS entries',
                 'SUM(CASE WHEN l.type = :debt THEN 1 ELSE 0 END) AS debts',
@@ -157,8 +166,13 @@ class LedgerEntryRepository extends ServiceEntityRepository
             ->setParameter('debt', LedgerTypeEnum::DEBT)
             ->setParameter('payment', LedgerTypeEnum::PAYMENT)
             ->setParameter('today', $today)
-            ->getQuery()
-            ->getSingleResult();
+            ->getQuery();
+
+        try {
+            $result = $query->getSingleResult();
+        } catch (\Throwable) {
+            $result = [];
+        }
 
         return [
             'entries' => (int) $result['entries'],

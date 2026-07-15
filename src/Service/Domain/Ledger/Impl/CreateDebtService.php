@@ -34,8 +34,6 @@ readonly class CreateDebtService
 
         return $this->entityManager->wrapInTransaction(
             function () use ($shop, $customer, $command): LedgerEntryResponse {
-                $customer->increaseBalance($command->amountInCents);
-
                 $ledgerEntry = $this->ledgerEntryMapper->fromCreateDebtCommand($customer, $command);
                 $ledgerEntry->setShop($shop);
 

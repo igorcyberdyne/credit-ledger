@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Customer;
 use App\Entity\Shop;
+use App\Enum\LedgerTypeEnum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -22,24 +23,43 @@ class CustomerRepository extends ServiceEntityRepository
      *     totalDebtInCents:int
      * }
      */
-    public function getDashboardStatistics(
-        Shop $shop,
-    ): array {
-        $result = $this->createQueryBuilder('c')
-            ->select([
-                'COUNT(c.id) AS customers',
-                'SUM(CASE WHEN c.balanceInCents > 0 THEN 1 ELSE 0 END) AS customersWithDebt',
-                'COALESCE(SUM(c.balanceInCents), 0) AS totalDebtInCents',
-            ])
+    public function getCustomersDebtStatistics(Shop $shop): array
+    {
+        $rows = $this->createQueryBuilder('c')
+            ->select('c.id AS customerId')
+            ->addSelect('COALESCE(SUM(
+            CASE
+                WHEN l.type = :debt THEN l.amountInCents
+                WHEN l.type = :payment THEN -l.amountInCents
+                ELSE 0
+            END
+        ), 0) AS balance')
+            ->leftJoin('c.ledgerEntries', 'l')
             ->where('c.shop = :shop')
+            ->groupBy('c.id')
             ->setParameter('shop', $shop)
+            ->setParameter('debt', LedgerTypeEnum::DEBT)
+            ->setParameter('payment', LedgerTypeEnum::PAYMENT)
             ->getQuery()
-            ->getSingleResult();
+            ->getScalarResult();
+
+        $customers = count($rows);
+        $customersWithDebt = 0;
+        $totalDebtInCents = 0;
+
+        foreach ($rows as $row) {
+            $balance = (int) $row['balance'];
+
+            if ($balance > 0) {
+                ++$customersWithDebt;
+                $totalDebtInCents += $balance;
+            }
+        }
 
         return [
-            'customers' => (int) $result['customers'],
-            'customersWithDebt' => (int) $result['customersWithDebt'],
-            'totalDebtInCents' => (int) $result['totalDebtInCents'],
+            'customers' => $customers,
+            'customersWithDebt' => $customersWithDebt,
+            'totalDebtInCents' => $totalDebtInCents,
         ];
     }
 

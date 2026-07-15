@@ -57,10 +57,6 @@ class Customer extends BaseEntitySoftDeletable implements BlameableInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photo = null;
 
-    #[Assert\Positive]
-    #[ORM\Column]
-    private int $balanceInCents = 0;
-
     /**
      * @var Collection<int, LedgerEntry>
      */
@@ -221,56 +217,6 @@ class Customer extends BaseEntitySoftDeletable implements BlameableInterface
     public function setUuid(Uuid $uuid): static
     {
         $this->uuid = $uuid;
-
-        return $this;
-    }
-
-    public function getBalanceInCents(): ?int
-    {
-        return $this->balanceInCents;
-    }
-
-    public function setBalanceInCents(int $balanceInCents): static
-    {
-        $this->balanceInCents = $balanceInCents;
-
-        return $this;
-    }
-
-    public function increaseBalance(int $amountInCents): static
-    {
-        if ($amountInCents <= 0) {
-            throw new \InvalidArgumentException();
-        }
-
-        $this->balanceInCents += $amountInCents;
-
-        return $this;
-    }
-
-    public function decreaseBalance(int $amountInCents): static
-    {
-        if ($amountInCents <= 0) {
-            throw new \InvalidArgumentException();
-        }
-
-        if ($amountInCents > $this->balanceInCents) {
-            throw new \LogicException('Balance cannot become negative.');
-        }
-
-        $this->balanceInCents -= $amountInCents;
-
-        return $this;
-    }
-
-    public function applyLedgerEntry(
-        LedgerEntry $entry,
-    ): self {
-        $this->balanceInCents += $entry->balanceImpact();
-
-        if ($this->balanceInCents < 0) {
-            throw new \LogicException('Le solde ne peut pas être négatif.');
-        }
 
         return $this;
     }

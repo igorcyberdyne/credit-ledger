@@ -45,11 +45,6 @@ final readonly class ReverseLedgerEntryService
                 }
 
                 /*
-                 * Mise à jour du solde du client.
-                 */
-                $customer->applyLedgerEntry($reverseEntry);
-
-                /*
                  * Sauvegarde de la nouvelle écriture.
                  */
                 $this->entityManager->persist($reverseEntry);

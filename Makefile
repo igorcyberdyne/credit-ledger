@@ -342,6 +342,25 @@ reset-db-with-fixtures-test:
 	@$(MAKE) dump-env-test
 	@$(MAKE) reset-db-with-fixtures ENV=test TARGET_DB=test
 
+.PHONY: reset-migration-with-db-fixtures
+reset-migration-with-db-fixtures:
+	@if [ "$(SKIP_MIGRATION)" != "1" ]; then \
+		$(MAKE) migrations-remove; \
+	fi
+	-@$(MAKE) ddd
+	@$(MAKE) ddc
+	@if [ "$(SKIP_MIGRATION)" != "1" ]; then \
+		$(MAKE) migration; \
+	fi
+	@$(MAKE) migrate
+	@$(MAKE) fixtures
+	@$(MAKE) cache-and-log-remove
+
+.PHONY: reset-migration-with-db-fixtures-test
+reset-migration-with-db-fixtures-test:
+	@$(MAKE) dump-env-test
+	@$(MAKE) reset-migration-with-db-fixtures ENV=test TARGET_DB=test SKIP_MIGRATION=1
+
 sh:
 	$(DC) exec $(PHP_CONTAINER) sh
 
