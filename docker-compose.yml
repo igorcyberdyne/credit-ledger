@@ -41,6 +41,22 @@ services:
     volumes:
       - database:/var/lib/mysql
 
+  worker:
+      build:
+          context: ./
+          target: php
+      command: php bin/console messenger:consume async --no-interaction --memory-limit=2048M --sleep=5
+      restart: unless-stopped
+      networks:
+          - credit_ledger
+      depends_on:
+          - php
+          - database
+      volumes:
+          - .:/var/www/html:cached
+      environment:
+          APP_ENV: ${APP_ENV:-dev}
+
   node:
     image: node:20-alpine
     working_dir: /var/www/html

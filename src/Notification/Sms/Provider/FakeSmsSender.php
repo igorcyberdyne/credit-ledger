@@ -26,6 +26,8 @@ final class FakeSmsSender implements SmsSenderInterface
         $this->logger->warning('Fake SMS sent (dev/test environment)', [
             'phone' => $command->phone,
             'message' => $command->message,
+            'type' => $command->type,
+            'reference' => $command->reference,
         ]);
     }
 
