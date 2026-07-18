@@ -28,7 +28,7 @@ Authorization: Bearer {{Security.token}}
 
 
 ### Récupérer un client
-@customerUuid = 019f62a2-ac1b-7d4b-bf0d-f896f7c7c932
+@customerUuid = 019f7585-aa36-795a-9d3f-9efeb78c218b
 GET {{baseUrl}}/api/customers/{{customerUuid}}
 Accept: application/json
 Authorization: Bearer {{Security.token}}
@@ -65,14 +65,14 @@ Authorization: Bearer {{Security.token}}
 }
 
 ### Corriger un paiement de dette pour client
-@ledgerUuid = 019f62c0-c5cb-7e3e-b8d9-b9985d51e35b
+@ledgerUuid = 019f7586-277f-75dc-b913-10886eb5a58b
 POST {{baseUrl}}/api/ledgers/{{ledgerUuid}}/correct
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer {{Security.token}}
 
 {
-    "amountInCents": 700,
+    "amountInCents": 500,
     "paymentMethod": "CASH",
     "description": "Correction du paiement précédent. La facture #12345",
     "occurredAt": "2026-07-15T00:30:00+02:00"

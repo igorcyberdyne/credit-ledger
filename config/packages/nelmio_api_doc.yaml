@@ -1,0 +1,18 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: CreditBook API
+            description: API REST de gestion des crédits clients
+            version: 1.0.0
+
+        components:
+            securitySchemes:
+                Bearer:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+
+    areas:
+        default:
+            path_patterns:
+                - ^/api
