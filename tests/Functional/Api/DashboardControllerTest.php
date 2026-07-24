@@ -8,9 +8,40 @@ use App\Tests\Factory\CustomerFactory;
 use App\Tests\Factory\LedgerEntryFactory;
 use App\Tests\Factory\ShopFactory;
 use App\Tests\Functional\AuthenticatedApiTestCase;
+use Doctrine\ORM\EntityManagerInterface;
 
 final class DashboardControllerTest extends AuthenticatedApiTestCase
 {
+    /**
+     * @throws \Throwable
+     */
+    public function testDashboardShopIsNotEmpty(): void
+    {
+        $this->wrapInRollback(function (EntityManagerInterface $entityManager): void {
+            $this->shop->setPhone('123456789');
+            $entityManager->flush();
+
+            $json = $this->authenticatedGet('/api/dashboard');
+            $this->assertOk();
+
+            $json = $json->apiSuccessResponse->data;
+
+            self::assertNotEmpty($json['shop']);
+            self::assertEquals(
+                [
+                    'name' => $this->shop->getName(),
+                    'address' => $this->shop->getAddress(),
+                    'postalCode' => $this->shop->getPostalCode(),
+                    'city' => $this->shop->getCity(),
+                    'country' => $this->shop->getCountry(),
+                    'phone' => '123456789',
+                    'currency' => $this->shop->getCurrency()->value,
+                ],
+                $json['shop']
+            );
+        });
+    }
+
     public function testDashboardIsEmpty(): void
     {
         $json = $this->authenticatedGet('/api/dashboard');

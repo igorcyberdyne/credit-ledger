@@ -27,7 +27,10 @@ readonly class GetCustomersService
         PaginationCriteria $criteria,
         string $uri,
     ): CustomerListResponse {
-        $queryBuilder = $this->customerRepository->createCustomersLedgerHistoryByShopQueryBuilder($shop);
+        $queryBuilder = $this->customerRepository->createCustomersLedgerHistoryByShopQueryBuilder(
+            $shop,
+            $criteria->q ?? ''
+        );
         $pagination = $this->paginator->paginate(
             target: $queryBuilder,
             page: $criteria->page,

@@ -24,7 +24,7 @@ final readonly class LoginFailureHandler implements AuthenticationFailureHandler
      */
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): Response
     {
-        $data = new ApiResponse(apiErrorResponse: new ApiErrorResponse('INVALID_CREDENTIALS', 'Invalid credentials'));
+        $data = new ApiResponse(apiErrorResponse: new ApiErrorResponse('INVALID_CREDENTIALS', 'Identifiants non valides'));
 
         return new JsonResponse($this->serializer->serialize($data, 'json', ['skip_null_values' => true]), Response::HTTP_UNAUTHORIZED, json: true);
     }

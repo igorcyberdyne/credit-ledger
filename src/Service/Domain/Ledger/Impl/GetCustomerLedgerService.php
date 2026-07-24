@@ -10,6 +10,7 @@ use App\Mapper\LedgerEntryMapper;
 use App\Repository\LedgerEntryRepository;
 use App\Service\Domain\Customer\Contracts\GetCustomerServiceInterface;
 use App\Service\Domain\Customer\Impl\CustomerBalanceService;
+use App\Service\Domain\Ledger\CustomerLedgerTimelineBuilder;
 use Knp\Component\Pager\PaginatorInterface;
 
 readonly class GetCustomerLedgerService
@@ -20,6 +21,7 @@ readonly class GetCustomerLedgerService
         private CustomerBalanceService $customerBalanceService,
         private PaginatorInterface $paginator,
         private GetCustomerServiceInterface $getCustomerService,
+        private CustomerLedgerTimelineBuilder $timelineBuilder,
     ) {
     }
 
@@ -37,10 +39,7 @@ readonly class GetCustomerLedgerService
             limit: $criteria->limit,
         );
 
-        $entries = [];
-        foreach ($pagination->getItems() as $entry) {
-            $entries[] = $this->ledgerMapper->toResponse($entry);
-        }
+        $entries = $this->timelineBuilder->build($pagination->getItems());
 
         return new CustomerLedgerResponse(
             statistics: $this->customerBalanceService->getStatistics($customer),

@@ -13,6 +13,8 @@ use App\Enum\PaymentMethodEnum;
 use App\Exception\Domain\Ledger\LedgerEntryAlreadyReversedException;
 use App\Repository\LedgerEntryRepository;
 use App\ValueObject\Money;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -61,7 +63,7 @@ class LedgerEntry extends BaseEntitySoftDeletable implements BlameableInterface
         onDelete: 'SET NULL',
     )]
     /**
-     * Ecriture d'origine.
+     * L'écriture originale annulée par celle-ci.
      */
     private ?LedgerEntry $originalEntry = null;
 
@@ -70,13 +72,29 @@ class LedgerEntry extends BaseEntitySoftDeletable implements BlameableInterface
         mappedBy: 'originalEntry',
     )]
     /**
-     * Écriture d'annulation.
+     * L'écriture qui annule celle-ci.
      */
     private ?LedgerEntry $reversal = null;
+
+    /**
+     * L'écriture originale corrigée par celle-ci.
+     */
+    #[ORM\ManyToOne(
+        targetEntity: self::class,
+        inversedBy: 'corrections'
+    )]
+    private ?LedgerEntry $correctedEntry = null;
+
+    #[ORM\OneToMany(
+        targetEntity: self::class,
+        mappedBy: 'correctedEntry'
+    )]
+    private Collection $corrections;
 
     public function __construct()
     {
         $this->uuid = Uuid::v7();
+        $this->corrections = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -186,6 +204,16 @@ class LedgerEntry extends BaseEntitySoftDeletable implements BlameableInterface
         return $this->amountInCents;
     }
 
+    public function getAmountFormat(): string
+    {
+        return new Money($this->getAmountInCents(), $this->getShop()->getCurrency())->format();
+    }
+
+    public function getAmountDecimal(): string
+    {
+        return new Money($this->getAmountInCents(), $this->getShop()->getCurrency())->decimal();
+    }
+
     public function setAmountInCents(int $amountInCents): static
     {
         $this->amountInCents = $amountInCents;
@@ -198,47 +226,6 @@ class LedgerEntry extends BaseEntitySoftDeletable implements BlameableInterface
         $this->uuid = $uuid;
 
         return $this;
-    }
-
-    public function isReversed(): bool
-    {
-        return null !== $this->reversal;
-    }
-
-    public function canBeReversed(): bool
-    {
-        return !$this->isReversed();
-    }
-
-    public function reverse(): LedgerEntry
-    {
-        if (!$this->canBeReversed()) {
-            throw new LedgerEntryAlreadyReversedException('Cette écriture est déjà annulée.');
-        }
-
-        $reverse = new self();
-
-        $reverse
-            ->setCustomer($this->customer)
-            ->setOccurredAt(new \DateTimeImmutable())
-            ->setAmountInCents($this->amountInCents)
-            ->setOriginalEntry($this)
-            ->setDescription(sprintf(
-                'Annulation%s : %s',
-                !empty($this->getDescription()) ? "({$this->getDescription()})" : '',
-                new Money($this->getAmountInCents(), $this->getShop()->getCurrency())->format(),
-            ));
-
-        $this->setReversal($reverse);
-
-        $reverse->setType(
-            match ($this->type) {
-                LedgerTypeEnum::DEBT => LedgerTypeEnum::PAYMENT,
-                LedgerTypeEnum::PAYMENT => LedgerTypeEnum::DEBT,
-            }
-        );
-
-        return $reverse;
     }
 
     public function balanceImpact(): int
@@ -281,5 +268,130 @@ class LedgerEntry extends BaseEntitySoftDeletable implements BlameableInterface
         $this->reversal = $reversal;
 
         return $this;
+    }
+
+    public function getCorrectedEntry(): ?self
+    {
+        return $this->correctedEntry;
+    }
+
+    public function setCorrectedEntry(?self $correctedEntry): static
+    {
+        $this->correctedEntry = $correctedEntry;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, LedgerEntry>
+     */
+    public function getCorrections(): Collection
+    {
+        return $this->corrections;
+    }
+
+    public function addCorrection(LedgerEntry $correction): static
+    {
+        if (!$this->corrections->contains($correction)) {
+            $this->corrections->add($correction);
+            $correction->setCorrectedEntry($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCorrection(LedgerEntry $correction): static
+    {
+        if ($this->corrections->removeElement($correction)) {
+            // set the owning side to null (unless already changed)
+            if ($correction->getCorrectedEntry() === $this) {
+                $correction->setCorrectedEntry(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Une écriture de reverse est purement technique.
+     */
+    public function isReverseEntry(): bool
+    {
+        return null !== $this->originalEntry;
+    }
+
+    /**
+     * Détermine si une opération est annulée.
+     */
+    public function isCancelled(): bool
+    {
+        return null !== $this->reversal;
+    }
+
+    /**
+     * Détermine si l'écriture est une correction.
+     */
+    public function isCorrection(): bool
+    {
+        return null !== $this->correctedEntry;
+    }
+
+    /**
+     * Détermine si cette opération peut encore être annulée.
+     */
+    public function canBeReversed(): bool
+    {
+        if ($this->isCancelled()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Détermine si cette opération peut encore être corrigée.
+     */
+    public function canCorrect(): bool
+    {
+        if ($this->isCancelled()) {
+            return false;
+        }
+
+        if ($this->isCorrection()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function reverse(): LedgerEntry
+    {
+        if (!$this->canBeReversed()) {
+            throw new LedgerEntryAlreadyReversedException('Cette écriture est déjà annulée.');
+        }
+
+        $reverse = new self();
+
+        $reverse
+            ->setCustomer($this->customer)
+            ->setOccurredAt(new \DateTimeImmutable())
+            ->setAmountInCents($this->amountInCents)
+            ->setOriginalEntry($this)
+            ->setDescription(sprintf(
+                'Annulation%s : %s',
+                !empty($this->getDescription()) ? "({$this->getDescription()})" : '',
+                $this->getAmountFormat(),
+            ));
+
+        $this->setReversal($reverse); // indique qu'elle est annulée
+
+        $reverse->setType(
+            match ($this->type) {
+                LedgerTypeEnum::DEBT => LedgerTypeEnum::PAYMENT,
+                LedgerTypeEnum::PAYMENT => LedgerTypeEnum::DEBT,
+            }
+        );
+
+        return $reverse;
     }
 }

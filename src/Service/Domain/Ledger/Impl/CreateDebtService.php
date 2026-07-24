@@ -37,6 +37,10 @@ readonly class CreateDebtService
                 $ledgerEntry = $this->ledgerEntryMapper->fromCreateDebtCommand($customer, $command);
                 $ledgerEntry->setShop($shop);
 
+                if (!empty($ledgerEntry->getDescription()) && str_contains(strtolower($ledgerEntry->getDescription()), 'dette')) {
+                    $ledgerEntry->setDescription(sprintf('Dette: %s', $ledgerEntry->getDescription()));
+                }
+
                 $this->entityManager->persist($ledgerEntry);
 
                 $this->entityManager->persist($customer);

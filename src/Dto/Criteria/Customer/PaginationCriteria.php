@@ -9,6 +9,7 @@ class PaginationCriteria
         public int $limit = 20,
         public ?string $sort = null,
         public string $direction = 'DESC',
+        public ?string $q = '',
     ) {
     }
 

@@ -523,7 +523,7 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
             );
 
             self::assertTrue(
-                $original->isReversed(),
+                $original->isCancelled(),
             );
 
             $reversal = $original->getReversal();
@@ -598,7 +598,7 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
                 ])
             ;
 
-            self::assertTrue($payment->isReversed());
+            self::assertTrue($payment->isCancelled());
             self::assertNotNull($payment->getReversal());
 
             /** @var Customer $customer */
@@ -713,7 +713,7 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
 
             $entry = $this->findLedgerEntry($entry->getUuid()->toRfc4122());
 
-            self::assertFalse($entry->isReversed());
+            self::assertFalse($entry->isCancelled());
 
             self::assertNull($entry->getReversal());
         });
@@ -764,9 +764,13 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
 
             $original = $this->findLedgerEntry($entry->getUuid()->toRfc4122());
 
-            self::assertTrue($original->isReversed());
+            self::assertTrue($original->isCancelled());
 
             self::assertNotNull($original->getReversal());
+
+            $correctedEntry = $this->findLedgerEntry($response['uuid'])->getCorrectedEntry();
+            self::assertNotNull($correctedEntry);
+            self::assertEquals($correctedEntry->getAmountInCents(), $original->getAmountInCents());
 
             /** @var Customer $customer */
             $customer = $this->customerRepository->find($customer->getId());
@@ -835,7 +839,7 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
             $payment = $this->findLedgerEntry($payment->getUuid()->toRfc4122());
 
             self::assertTrue(
-                $payment->isReversed(),
+                $payment->isCancelled(),
             );
 
             /** @var Customer $customer */

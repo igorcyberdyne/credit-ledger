@@ -8,7 +8,6 @@ use App\Dto\Response\Domain\Ledger\LedgerEntryResponse;
 use App\Entity\Customer;
 use App\Entity\LedgerEntry;
 use App\Enum\LedgerTypeEnum;
-use App\ValueObject\Money;
 
 final readonly class LedgerEntryMapper
 {
@@ -18,7 +17,7 @@ final readonly class LedgerEntryMapper
         return new LedgerEntryResponse(
             uuid: $entry->getUuid()->toRfc4122(),
             type: $entry->getType()->value,
-            amount: new Money($entry->getAmountInCents(), $entry->getShop()->getCurrency())->decimal(),
+            amount: $entry->getAmountDecimal(),
             description: $entry->getDescription(),
             occurredAt: $entry->getOccurredAt()?->format(DATE_ATOM),
             paymentMethod: $entry->getPaymentMethod(),

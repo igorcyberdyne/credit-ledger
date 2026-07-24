@@ -5,25 +5,24 @@ namespace App\Service\Domain\Ledger\Impl;
 use App\Dto\Command\Domain\Ledger\CorrectLedgerEntryCommand;
 use App\Dto\Command\Domain\Ledger\CreateDebtCommand;
 use App\Dto\Command\Domain\Ledger\CreatePaymentCommand;
-use App\Dto\Command\Domain\Ledger\ReverseLedgerEntryCommand;
 use App\Dto\Response\Domain\Ledger\LedgerEntryResponse;
 use App\Entity\LedgerEntry;
 use App\Entity\Shop;
 use App\Enum\LedgerTypeEnum;
+use App\Exception\Domain\Ledger\LedgerEntryCannotBeReversedException;
+use App\Mapper\LedgerEntryMapper;
 use App\Service\Domain\Ledger\Contracts\GetLedgerServiceInterface;
 use App\ValueObject\Money;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 readonly class CorrectLedgerEntryService
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private ReverseLedgerEntryService $reverseLedgerEntryService,
         private CreateDebtService $createDebtService,
         private CreatePaymentService $createPaymentService,
         private GetLedgerServiceInterface $getLedgerService,
-        private EventDispatcherInterface $eventDispatcher,
+        private LedgerEntryMapper $ledgerEntryMapper,
     ) {
     }
 
@@ -37,23 +36,28 @@ readonly class CorrectLedgerEntryService
     ): LedgerEntryResponse {
         $ledgerEntry = $this->getLedgerService->getLedgerByUuidAndShop($ledgerUuid, $shop);
 
+        if (!$ledgerEntry->canBeReversed()) {
+            throw new LedgerEntryCannotBeReversedException('Cette écriture ne peut pas être annulée.');
+        }
+
         return $this->entityManager->wrapInTransaction(
             function () use (
                 $shop,
                 $ledgerEntry,
                 $command,
             ): LedgerEntryResponse {
-                // 1. Annulation de l'écriture existante
-                $this->reverseLedgerEntryService->reverse(
-                    $shop,
-                    $ledgerEntry->getUuid()->toRfc4122(),
-                    new ReverseLedgerEntryCommand()
-                );
+                /**
+                 * 1. On annule la correction.
+                 */
+                $reverse = $ledgerEntry->reverse();
+                $reverse->setShop($shop);
+                $this->entityManager->persist($reverse);
 
+                /**
+                 * 2. Création de la nouvelle écriture.
+                 */
                 $customer = $ledgerEntry->getCustomer();
-
-                // 2. Création de la nouvelle écriture
-                return match ($ledgerEntry->getType()) {
+                $entryResponse = match ($ledgerEntry->getType()) {
                     LedgerTypeEnum::DEBT => $this->createDebtService->create(
                         shop: $shop,
                         customerUuid: $customer->getUuid()->toRfc4122(),
@@ -78,6 +82,14 @@ readonly class CorrectLedgerEntryService
                         ),
                     ),
                 };
+
+                $entry = $this->getLedgerService->getLedgerByUuid($entryResponse->uuid);
+                $entry->setCorrectedEntry($ledgerEntry);
+                $ledgerEntry->addCorrection($entry);
+
+                $this->entityManager->flush();
+
+                return $this->ledgerEntryMapper->toResponse($entry);
             }
         );
     }
@@ -89,7 +101,7 @@ readonly class CorrectLedgerEntryService
         return $command->description ?? sprintf(
             'Correction%s : %s -> %s',
             !empty($ledgerEntry->getDescription()) ? "({$ledgerEntry->getDescription()})" : '',
-            new Money($ledgerEntry->getAmountInCents(), $ledgerEntry->getShop()->getCurrency())->format(),
+            $ledgerEntry->getAmountFormat(),
             new Money($command->amountInCents, $ledgerEntry->getShop()->getCurrency())->format(),
         );
     }
