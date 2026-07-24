@@ -20,7 +20,7 @@ class MeControllerTest extends BasicWebTestCase
     {
         $user = $this->createUser(
             $shop ?? $entityManager->getRepository(Shop::class)->findAll()[0],
-            $this->getGenerator()->unique()->email,
+            $this->getGenerator()->unique()->email(),
             [UserRoleEnum::EMPLOYEE->value],
         );
 
