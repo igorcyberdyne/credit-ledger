@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\EventSubscriber;
+namespace App\EventSubscriber\Security;
 
 use App\Dto\Response\Infra\ApiErrorResponse;
 use App\Dto\Response\Infra\ApiResponse;
