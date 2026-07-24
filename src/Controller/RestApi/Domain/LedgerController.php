@@ -15,6 +15,7 @@ use App\Service\Domain\Ledger\Impl\CreateDebtService;
 use App\Service\Domain\Ledger\Impl\CreatePaymentService;
 use App\Service\Domain\Ledger\Impl\GetCustomerLedgerService;
 use App\Service\Domain\Ledger\Impl\ReverseLedgerEntryService;
+use App\Service\Domain\Ledger\Impl\UndoCorrectionService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -100,7 +101,19 @@ final class LedgerController extends ApiController
         string $uuid,
         #[MapRequestPayload]
         ReverseLedgerEntryCommand $command,
+        UndoCorrectionService $undoCorrectionService,
     ): JsonResponse {
+        $ledgerEntry = $this->getLedgerService->getLedgerByUuidAndShop($uuid, $this->getShop());
+
+        if (!empty($ledgerEntry->getCorrectedEntry())) {
+            return $this->apiSuccess(
+                $undoCorrectionService->undo(
+                    $this->getShop(),
+                    $ledgerEntry->getUuid()->toRfc4122(),
+                )
+            );
+        }
+
         return $this->apiSuccess(
             $this->reverseLedgerEntryService->reverse(
                 $this->getShop(),

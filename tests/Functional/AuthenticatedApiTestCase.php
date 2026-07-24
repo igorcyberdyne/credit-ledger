@@ -35,7 +35,7 @@ class AuthenticatedApiTestCase extends BasicWebTestCase
             ]);
 
         /** @var JWTTokenManagerInterface $jwt */
-        $jwt = $this->getContainerInterface()->get(
+        $jwt = $this->getService(
             JWTTokenManagerInterface::class
         );
 

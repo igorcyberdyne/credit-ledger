@@ -4,6 +4,7 @@ namespace App\Service\Domain;
 
 use App\Dto\Response\Domain\Dashboard\DashboardResponse;
 use App\Entity\Shop;
+use App\Mapper\ShopMapper;
 use App\Repository\CustomerRepository;
 use App\Repository\LedgerEntryRepository;
 
@@ -33,6 +34,7 @@ readonly class GetDashboardService
             totalDebtInCents: $customerStatistics['totalDebtInCents'],
             todayDebtInCents: $ledgerStatistics['todayDebtInCents'],
             todayPaymentsInCents: $ledgerStatistics['todayPaymentsInCents'],
+            shop: ShopMapper::toResponse($shop),
         );
     }
 }

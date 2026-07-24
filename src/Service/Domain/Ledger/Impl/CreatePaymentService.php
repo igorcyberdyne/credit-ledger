@@ -45,6 +45,10 @@ readonly class CreatePaymentService
                 );
                 $ledgerEntry->setShop($shop);
 
+                if (!empty($ledgerEntry->getDescription()) && str_contains(strtolower($ledgerEntry->getDescription()), 'paiement')) {
+                    $ledgerEntry->setDescription(sprintf('Paiement: %s', $ledgerEntry->getDescription()));
+                }
+
                 $this->entityManager->persist($ledgerEntry);
 
                 $this->entityManager->flush();

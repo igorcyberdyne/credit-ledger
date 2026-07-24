@@ -32,8 +32,6 @@ final readonly class ReverseLedgerEntryService
 
         return $this->entityManager->wrapInTransaction(
             function () use ($shop, $ledgerEntry, $command): LedgerEntryResponse {
-                $customer = $ledgerEntry->getCustomer();
-
                 /**
                  * Création de l'écriture inverse.
                  */
@@ -42,6 +40,10 @@ final readonly class ReverseLedgerEntryService
 
                 if (null !== $command->reason) {
                     $reverseEntry->setDescription($command->reason);
+                }
+
+                if (!empty($ledgerEntry->getDescription()) && str_contains(strtolower($ledgerEntry->getDescription()), 'annulation')) {
+                    $ledgerEntry->setDescription(sprintf('Annulation: %s', $ledgerEntry->getDescription()));
                 }
 
                 /*

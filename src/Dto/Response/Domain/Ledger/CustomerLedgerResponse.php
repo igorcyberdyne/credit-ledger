@@ -10,7 +10,7 @@ use App\Dto\Response\Domain\PaginationMetaResponse;
 final readonly class CustomerLedgerResponse
 {
     /**
-     * @param LedgerEntryResponse[] $entries
+     * @param CustomerLedgerItemResponse[] $entries
      */
     public function __construct(
         public CustomerBalanceResponse $statistics,

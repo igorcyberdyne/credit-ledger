@@ -8,7 +8,13 @@ Content-Type: application/json
 }
 
 ### Voir mes infos
+@meUuid = 019f652f-08cf-76cb-8d6b-9b411f77516b
 GET {{baseUrl}}/api/me
+Accept: application/json
+Authorization: Bearer {{Security.token}}
+
+### Dashboard
+GET {{baseUrl}}/api/dashboard
 Accept: application/json
 Authorization: Bearer {{Security.token}}
 
@@ -20,22 +26,35 @@ Accept: application/json
 Authorization: Bearer {{Security.token}}
 
 {
-    "firstname": "Igor",
+    "firstname": "Igor 2",
     "lastname": "GAMATH",
-    "phone": "+33650102834",
+    "phone": "+33650102835",
     "note": "Client créé depuis un fichier .http"
 }
 
 
-### Récupérer un client
-@customerUuid = 019f7585-aa36-795a-9d3f-9efeb78c218b
-GET {{baseUrl}}/api/customers/{{customerUuid}}
+### Récupérer les clients du shop auquel appartient le user connecté
+GET {{baseUrl}}/api/customers
+Accept: application/json
+Authorization: Bearer {{Security.token}}
+
+
+### Récupérer un client par son UUID ou ID
+@customerId = 104
+@customerUuid = 019f901f-5600-7e34-9fb1-5f689c8e4d8a
+@customerUuidOrId = {{customerId}}
+GET {{baseUrl}}/api/customers/{{customerUuidOrId}}
 Accept: application/json
 Authorization: Bearer {{Security.token}}
 
 
 ### Liste des opération d'un client
 GET {{baseUrl}}/api/ledgers/customers/{{customerUuid}}/ledger
+Accept: application/json
+Authorization: Bearer {{Security.token}}
+
+### Liste des opération d'un client V2
+GET {{baseUrl}}/api/ledgers/customers/{{customerUuid}}/ledger-v2
 Accept: application/json
 Authorization: Bearer {{Security.token}}
 

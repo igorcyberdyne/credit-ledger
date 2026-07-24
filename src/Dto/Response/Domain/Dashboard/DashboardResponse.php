@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Dto\Response\Domain\Dashboard;
 
+use App\Dto\Response\Domain\ShopResponse;
+
 final readonly class DashboardResponse
 {
     public function __construct(
@@ -15,6 +17,7 @@ final readonly class DashboardResponse
         public int $totalDebtInCents,
         public int $todayDebtInCents,
         public int $todayPaymentsInCents,
+        public ShopResponse $shop,
     ) {
     }
 }

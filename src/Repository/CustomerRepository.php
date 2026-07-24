@@ -63,12 +63,33 @@ class CustomerRepository extends ServiceEntityRepository
         ];
     }
 
-    public function createCustomersLedgerHistoryByShopQueryBuilder(Shop $shop): QueryBuilder
-    {
-        return $this->createQueryBuilder('c')
+    public function createCustomersLedgerHistoryByShopQueryBuilder(
+        Shop $shop,
+        ?string $query = null,
+    ): QueryBuilder {
+        $qb = $this
+            ->createQueryBuilder('c')
+            ->select('c')
+            ->addSelect('MAX(l.updatedAt) AS HIDDEN lastLedgerAt')
             ->leftJoin('c.ledgerEntries', 'l')
             ->where('c.shop = :shop')
             ->setParameter('shop', $shop)
+            ->groupBy('c.id')
+            ->orderBy('lastLedgerAt', 'DESC')
+            ->addOrderBy('c.updatedAt', 'DESC')
+            ->addOrderBy('c.id', 'DESC')
         ;
+
+        $query = empty($query) ? null : strip_tags(trim($query));
+        if (!empty($query)) {
+            $orStatements = $qb->expr()->orX();
+
+            $orStatements->add('c.firstname LIKE :query')->add('c.lastname LIKE :query')->add('c.phone LIKE :query');
+            $qb->setParameter('query', '%'.$query.'%');
+
+            $qb->andWhere($orStatements);
+        }
+
+        return $qb;
     }
 }

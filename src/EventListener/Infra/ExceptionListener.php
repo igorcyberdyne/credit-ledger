@@ -4,13 +4,11 @@ namespace App\EventListener\Infra;
 
 use App\Exception\Domain\BusinessException;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\Attribute\When;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
-// #[When(env: 'prod')]
 #[AsEventListener]
 readonly class ExceptionListener
 {

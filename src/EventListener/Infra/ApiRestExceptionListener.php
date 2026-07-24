@@ -27,6 +27,8 @@ class ApiRestExceptionListener extends AbstractExceptionListener
             $message = "Vous n'avez pas les droits d'accès";
         } elseif ($code >= Response::HTTP_INTERNAL_SERVER_ERROR) {
             $message = Response::$statusTexts[$code] ?? 'Internal Server Error';
+        } elseif ($code >= Response::HTTP_BAD_REQUEST) {
+            $message = Response::$statusTexts[$code] ?? 'Internal Server Error';
         }
 
         return new JsonResponse([
