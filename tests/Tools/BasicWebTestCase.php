@@ -66,10 +66,14 @@ abstract class BasicWebTestCase extends WebTestCase
         $this->assertResponseIsSuccessful();
 
         $content = $response->apiSuccessResponse->data ?? null;
-        $this->assertNotNull($content);
+        $this->assertNotEmpty($content);
 
         /** @var LoginResponse $loginResponseDTO */
         $loginResponseDTO = $this->serializeJsonToDto($content, LoginResponse::class);
+        $this->assertNotEmpty($loginResponseDTO->token);
+        $this->assertNotEmpty($loginResponseDTO->refreshToken);
+        $this->assertNotEmpty($loginResponseDTO->expiresIn);
+        $this->assertEquals(3600, $loginResponseDTO->expiresIn);
 
         return $loginResponseDTO;
     }

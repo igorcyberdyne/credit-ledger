@@ -10,19 +10,25 @@ Content-Type: application/json
 ### Voir mes infos
 @meUuid = 019f652f-08cf-76cb-8d6b-9b411f77516b
 GET {{baseUrl}}/api/me
-Accept: application/json
 Authorization: Bearer {{Security.token}}
+
+### Refresh le token
+POST {{baseUrl}}/api/token/refresh
+Content-Type: application/json
+
+{
+    "refresh_token": "{{Security.refreshToken}}"
+}
 
 ### Dashboard
 GET {{baseUrl}}/api/dashboard
-Accept: application/json
+Content-Type: application/json
 Authorization: Bearer {{Security.token}}
 
 
 ### Création d'un client
 POST {{baseUrl}}/api/customers
 Content-Type: application/json
-Accept: application/json
 Authorization: Bearer {{Security.token}}
 
 {

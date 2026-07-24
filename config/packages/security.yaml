@@ -31,19 +31,24 @@ security:
                 username_path: email
                 password_path: password
 
-                success_handler: App\Service\Security\Handler\LoginSuccessHandler
+                success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: App\Service\Security\Handler\LoginFailureHandler
 
         api:
             pattern: ^/api
             stateless: true
+            entry_point: jwt
             jwt: ~
+
+            refresh_jwt:
+                check_path: gesdinet_jwt_refresh_token
 
 
     # Note: Only the *first* matching rule is applied
     access_control:
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/doc$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/token/refresh, roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:

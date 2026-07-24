@@ -8,7 +8,8 @@ final readonly class LoginResponse
 {
     public function __construct(
         public string $token,
-
+        public string $refreshToken,
+        public int $expiresIn,
         #[SerializedName('user')]
         public UserResponse $userResponseDTO,
     ) {
