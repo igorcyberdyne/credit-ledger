@@ -110,7 +110,9 @@ class LedgerEntryRepository extends ServiceEntityRepository
                     END
                 ),0) AS totalPaid,
 
-                COUNT(l.id) AS operations
+                COUNT(l.id) AS operations,
+
+                MAX(l.updatedAt) as lastDate
                 '
             )
             ->where('l.customer = :customer')
@@ -130,6 +132,7 @@ class LedgerEntryRepository extends ServiceEntityRepository
             totalDebtInCents: (int) $result['totalDebt'],
             totalPaidInCents: (int) $result['totalPaid'],
             operations: (int) $result['operations'],
+            lastDate: empty($result['lastDate']) ? null : $result['lastDate'],
         );
     }
 

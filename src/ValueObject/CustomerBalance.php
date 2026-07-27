@@ -9,6 +9,7 @@ final readonly class CustomerBalance
         public int $totalDebtInCents,
         public int $totalPaidInCents,
         public int $operations,
+        public ?string $lastDate = '',
     ) {
     }
 }

@@ -53,6 +53,7 @@ readonly class CustomerValidator
         }
 
         $phone = trim($phone);
+        $phone = str_replace(' ', '', $phone);
 
         try {
             $existing = $this->getCustomerService->getCustomerByPhoneAndShop($phone, $shop);

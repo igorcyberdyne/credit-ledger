@@ -27,6 +27,7 @@ readonly class CustomerBalanceService
             totalDebtInCents: $customerBalance->totalDebtInCents,
             totalPaidInCents: $customerBalance->totalPaidInCents,
             operations: $customerBalance->operations,
+            lastDate: $customerBalance->lastDate,
         );
     }
 }
