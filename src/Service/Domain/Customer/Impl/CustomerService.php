@@ -34,6 +34,9 @@ readonly class CustomerService implements CustomerServiceInterface
 
     public function create(Shop $shop, CreateCustomerCommand $command): CustomerResponse
     {
+        // validation
+        $this->customerValidator->validateCreate($shop, $command);
+
         // Check si le client a été SoftDeleteable afin de le reactiver
         if (!empty($command->phone)) {
             $filters = $this->entityManager->getFilters();
@@ -61,9 +64,6 @@ readonly class CustomerService implements CustomerServiceInterface
                 $filters->enable('softdeleteable');
             }
         }
-
-        // validation
-        $this->customerValidator->validateCreate($shop, $command);
 
         // conversion
         $customer = $this->customerMapper->fromCreateCustomerCommand($command);

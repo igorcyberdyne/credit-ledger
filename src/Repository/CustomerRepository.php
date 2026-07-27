@@ -67,20 +67,29 @@ class CustomerRepository extends ServiceEntityRepository
         Shop $shop,
         ?string $query = null,
     ): QueryBuilder {
+        $subQuery = '
+            CASE
+                WHEN l.type = :debt THEN l.amountInCents
+                WHEN l.type = :payment THEN -l.amountInCents
+                ELSE 0
+            END
+        ';
+
         $qb = $this
             ->createQueryBuilder('c')
             ->select('c')
-            ->addSelect('MAX(l.updatedAt) AS HIDDEN lastLedgerAt')
+            ->addSelect('MAX(l.createdAt) AS HIDDEN lastLedgerAt')
+            ->addSelect(sprintf('COALESCE(SUM(%s),0) AS HIDDEN balance', $subQuery))
             ->leftJoin('c.ledgerEntries', 'l')
             ->where('c.shop = :shop')
             ->setParameter('shop', $shop)
+            ->setParameter('debt', LedgerTypeEnum::DEBT)
+            ->setParameter('payment', LedgerTypeEnum::PAYMENT)
             ->groupBy('c.id')
-            ->orderBy('lastLedgerAt', 'DESC')
-            ->addOrderBy('c.updatedAt', 'DESC')
-            ->addOrderBy('c.id', 'DESC')
-        ;
+            ->addOrderBy('balance', 'DESC')
+            ->addOrderBy('lastLedgerAt', 'DESC')
+            ->addOrderBy('c.id', 'DESC');
 
-        $query = empty($query) ? null : strip_tags(trim($query));
         if (!empty($query)) {
             $orStatements = $qb->expr()->orX();
 

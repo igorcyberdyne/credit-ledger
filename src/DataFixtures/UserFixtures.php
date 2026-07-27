@@ -38,7 +38,12 @@ final class UserFixtures extends BaseFixtures implements DependentFixtureInterfa
             Shop::class
         );
 
-        $shops = [$balto, $nono];
+        $emailDomainBalto = 'balto.fr';
+        $emailDomainNono = 'nono.fr';
+        $shops = [
+            $emailDomainBalto => $balto,
+            $emailDomainNono => $nono,
+        ];
 
         /*
          * Compte System
@@ -61,7 +66,7 @@ final class UserFixtures extends BaseFixtures implements DependentFixtureInterfa
             shop: $balto,
             firstname: 'Paul',
             lastname: 'Martin',
-            email: 'manager@balto.fr',
+            email: sprintf('%s@%s', 'manager', $emailDomainBalto),
             role: UserRoleEnum::MANAGER->value,
             reference: self::OWNER_BALTO
         );
@@ -71,7 +76,7 @@ final class UserFixtures extends BaseFixtures implements DependentFixtureInterfa
             shop: $nono,
             firstname: 'Nicolas',
             lastname: 'Petit',
-            email: 'manager@nono.fr',
+            email: sprintf('%s@%s', 'manager', $emailDomainNono),
             role: UserRoleEnum::MANAGER->value,
             reference: self::OWNER_NONO
         );
@@ -79,40 +84,22 @@ final class UserFixtures extends BaseFixtures implements DependentFixtureInterfa
         /*
          * Employés fixes
          */
-
         foreach ([
-            ['Julie', 'Robert'],
-            ['Marc', 'Bernard'],
-            ['Sarah', 'Moreau'],
-            ['Tom', 'Garcia'],
+            ['Julie', 'Robert', $emailDomainBalto],
+            ['Julie', 'Robert', $emailDomainNono],
+            ['Sarah', 'Moreau', $emailDomainBalto],
+            ['Sarah', 'Moreau', $emailDomainNono],
+            ['Employee', 'Oko', $emailDomainBalto],
+            ['Employee', 'Oko', $emailDomainNono],
         ] as $employee) {
+            $emailDomain = $employee[2];
             $this->createUser(
                 manager: $manager,
-                shop: $this->faker->randomElement($shops),
+                shop: $shops[$emailDomain],
                 firstname: $employee[0],
                 lastname: $employee[1],
-                email: strtolower($employee[0]).'@example.fr',
+                email: sprintf('%s@%s', strtolower($employee[0]), $emailDomain),
                 role: UserRoleEnum::EMPLOYEE->value,
-            );
-        }
-
-        /*
-         * Utilisateurs Faker
-         */
-
-        for ($i = 0; $i < 30; ++$i) {
-            $firstname = $this->faker->firstName();
-
-            $lastname = $this->faker->lastName();
-
-            $this->createUser(
-                manager: $manager,
-                shop: $this->faker->randomElement($shops),
-                firstname: $firstname,
-                lastname: $lastname,
-                email: $this->faker->unique()->safeEmail(),
-                role: UserRoleEnum::EMPLOYEE->value,
-                phone: $this->faker->phoneNumber()
             );
         }
 

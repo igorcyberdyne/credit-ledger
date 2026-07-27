@@ -1,10 +1,19 @@
-### Authentification
+### Authentification MANAGER
 POST {{baseUrl}}/api/login
 Content-Type: application/json
 
 {
     "email": "manager@balto.fr",
     "password": "manager@balto.fr"
+}
+
+### Authentification EMPLOYEE
+POST {{baseUrl}}/api/login
+Content-Type: application/json
+
+{
+    "email": "employee@balto.fr",
+    "password": "employee@balto.fr"
 }
 
 ### Voir mes infos
