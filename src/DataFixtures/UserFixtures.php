@@ -116,7 +116,7 @@ final class UserFixtures extends BaseFixtures implements DependentFixtureInterfa
         ?string $phone = null,
         ?string $reference = null,
     ): void {
-        $user = new User()
+        $user = (new User())
             ->setShop($shop)
             ->setFirstname($firstname)
             ->setLastname($lastname)

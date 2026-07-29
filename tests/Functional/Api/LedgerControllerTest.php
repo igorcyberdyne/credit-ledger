@@ -398,7 +398,7 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
             $json = $this->createDebt($customer, 2500);
 
             self::assertSame(
-                new Money(2500)->decimal(),
+                (new Money(2500))->decimal(),
                 $json['amount'],
             );
             self::assertSame(
@@ -666,7 +666,7 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
             $this->createDebt(
                 $customer,
                 1200,
-                callback: function () {
+                callback: function (): void {
                     $this->assertNotFound();
                 }
             );
@@ -674,7 +674,7 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
             $this->createPayment(
                 $customer,
                 1200,
-                callback: function () {
+                callback: function (): void {
                     $this->assertNotFound();
                 }
             );

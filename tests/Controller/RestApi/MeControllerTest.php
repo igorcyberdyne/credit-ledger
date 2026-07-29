@@ -58,7 +58,7 @@ class MeControllerTest extends BasicWebTestCase
      */
     public function testMeUserSystem(): void
     {
-        $this->wrapInRollback(function () {
+        $this->wrapInRollback(function (): void {
             $loginResponseDTO = $this->fullAuthenticateUser(SystemUserProvider::USER_SYSTEM_EMAIL, [UserRoleEnum::MANAGER->value]);
 
             $this->assertEquals(
@@ -85,7 +85,7 @@ class MeControllerTest extends BasicWebTestCase
      */
     public function testMe(): void
     {
-        $this->wrapInRollback(function () {
+        $this->wrapInRollback(function (): void {
             $loginResponseDTO = $this->fullAuthenticateUser('me@test.com', [UserRoleEnum::MANAGER->value]);
 
             $userDto = $this->authenticateUserAndRetrieveUserDto($loginResponseDTO->token);
@@ -117,7 +117,7 @@ class MeControllerTest extends BasicWebTestCase
     #[DataProvider(methodName: 'errorDataProvider')]
     public function testFailureAuthentication(string $expectedCode, string $expectedMessage): void
     {
-        $this->wrapInRollback(function (EntityManagerInterface $entityManager) use ($expectedCode, $expectedMessage) {
+        $this->wrapInRollback(function (EntityManagerInterface $entityManager) use ($expectedCode, $expectedMessage): void {
             /** @var JWTTokenManagerInterface $jwt */
             $jwt = $this->getService(
                 JWTTokenManagerInterface::class

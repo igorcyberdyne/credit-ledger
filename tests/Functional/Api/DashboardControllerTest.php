@@ -66,7 +66,8 @@ final class DashboardControllerTest extends AuthenticatedApiTestCase
                 5,
                 [
                     'shop' => $this->shop,
-                ]);
+                ]
+            );
 
         $json = $this->authenticatedGet('/api/dashboard');
         $this->assertOk();
@@ -114,7 +115,7 @@ final class DashboardControllerTest extends AuthenticatedApiTestCase
 
     public function testDashboardWithPayments(): void
     {
-        $this->wrapInRollback(function () {
+        $this->wrapInRollback(function (): void {
             $customer = CustomerFactory::new()
                 ->createOneEntity([
                     'shop' => $this->shop,

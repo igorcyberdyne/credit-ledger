@@ -55,8 +55,8 @@ Authorization: Bearer {{Security.token}}
 
 
 ### Récupérer un client par son UUID ou ID
-@customerId = 104
-@customerUuid = 019f901f-5600-7e34-9fb1-5f689c8e4d8a
+@customerId = 211
+@customerUuid = 019fa952-438a-7121-974f-9d3835b1f4f6
 @customerUuidOrId = {{customerId}}
 GET {{baseUrl}}/api/customers/{{customerUuidOrId}}
 Accept: application/json

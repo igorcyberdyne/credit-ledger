@@ -16,7 +16,7 @@ final class CustomerControllerTest extends AuthenticatedApiTestCase
      */
     public function testListCustomers(): void
     {
-        $this->wrapInRollback(function () {
+        $this->wrapInRollback(function (): void {
             CustomerFactory::new()->createManyEntities(
                 10,
                 [
@@ -40,7 +40,7 @@ final class CustomerControllerTest extends AuthenticatedApiTestCase
 
     public function testGetCustomer(): void
     {
-        $this->wrapInRollback(function () {
+        $this->wrapInRollback(function (): void {
             $customer = CustomerFactory::new()
                 ->createOneEntity([
                     'shop' => $this->shop,
@@ -64,7 +64,7 @@ final class CustomerControllerTest extends AuthenticatedApiTestCase
      */
     public function testCreateCustomer(): void
     {
-        $this->wrapInRollback(function () {
+        $this->wrapInRollback(function (): void {
             $response = $this->authenticatedPost(
                 '/api/customers',
                 [
@@ -93,7 +93,7 @@ final class CustomerControllerTest extends AuthenticatedApiTestCase
      */
     public function testUpdateCustomer(): void
     {
-        $this->wrapInRollback(function () {
+        $this->wrapInRollback(function (): void {
             $customer = CustomerFactory::new()
                 ->createOneEntity([
                     'shop' => $this->shop,
@@ -122,7 +122,7 @@ final class CustomerControllerTest extends AuthenticatedApiTestCase
      */
     public function testArchiveCustomer(): void
     {
-        $this->wrapInRollback(function () {
+        $this->wrapInRollback(function (): void {
             /** @var Customer $customer */
             $customer = CustomerFactory::new()
                 ->createOneEntity([
@@ -143,7 +143,7 @@ final class CustomerControllerTest extends AuthenticatedApiTestCase
 
     public function testCannotAccessCustomerFromAnotherShop(): void
     {
-        $this->wrapInRollback(function () {
+        $this->wrapInRollback(function (): void {
             $customer = CustomerFactory::new()->createOneEntity();
 
             $this->authenticatedGet(
@@ -180,7 +180,7 @@ final class CustomerControllerTest extends AuthenticatedApiTestCase
      */
     public function testDuplicatePhone(): void
     {
-        $this->wrapInRollback(function () {
+        $this->wrapInRollback(function (): void {
             CustomerFactory::new()
                 ->createOneEntity([
                     'shop' => $this->shop,
@@ -202,7 +202,7 @@ final class CustomerControllerTest extends AuthenticatedApiTestCase
 
     public function testPagination(): void
     {
-        $this->wrapInRollback(function () {
+        $this->wrapInRollback(function (): void {
             CustomerFactory::new()->createManyEntities(
                 35,
                 [

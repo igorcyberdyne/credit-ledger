@@ -206,12 +206,12 @@ class LedgerEntry extends BaseEntitySoftDeletable implements BlameableInterface
 
     public function getAmountFormat(): string
     {
-        return new Money($this->getAmountInCents(), $this->getShop()->getCurrency())->format();
+        return (new Money($this->getAmountInCents(), $this->getShop()->getCurrency()))->format();
     }
 
     public function getAmountDecimal(): string
     {
-        return new Money($this->getAmountInCents(), $this->getShop()->getCurrency())->decimal();
+        return (new Money($this->getAmountInCents(), $this->getShop()->getCurrency()))->decimal();
     }
 
     public function setAmountInCents(int $amountInCents): static

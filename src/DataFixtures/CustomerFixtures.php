@@ -53,7 +53,7 @@ final class CustomerFixtures extends BaseFixtures implements DependentFixtureInt
         $index = 1;
 
         foreach ($fixedCustomers as [$firstname, $lastname]) {
-            $customer = new Customer()
+            $customer = (new Customer())
                 ->setShop($this->faker->randomElement($shops))
                 ->setFirstname($firstname)
                 ->setLastname($lastname)
@@ -82,7 +82,7 @@ final class CustomerFixtures extends BaseFixtures implements DependentFixtureInt
          */
 
         for ($i = 0; $i < 100; ++$i) {
-            $customer = new Customer()
+            $customer = (new Customer())
                 ->setShop($this->faker->randomElement($shops))
                 ->setFirstname($this->faker->firstName())
                 ->setLastname($this->faker->lastName())

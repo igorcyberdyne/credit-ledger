@@ -42,9 +42,9 @@ readonly class ExceptionListener
             ), $original->getTrace());
         }
 
-        return new ApiRestExceptionListener(
+        return (new ApiRestExceptionListener(
             $event,
             $this->logger,
-        )->getResponse();
+        ))->getResponse();
     }
 }

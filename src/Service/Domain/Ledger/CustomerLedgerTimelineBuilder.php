@@ -7,6 +7,7 @@ namespace App\Service\Domain\Ledger;
 use App\Dto\Response\Domain\Ledger\CustomerLedgerItemResponse;
 use App\Entity\LedgerEntry;
 use App\Enum\LedgerTypeEnum;
+use App\Tools\DateFormatter;
 
 final class CustomerLedgerTimelineBuilder
 {
@@ -65,14 +66,12 @@ final class CustomerLedgerTimelineBuilder
             type: $entry->getType()->value,
             amount: $entry->getAmountDecimal(),
             description: $this->buildDescription($entry),
-            occurredAt: ($entry->getOccurredAt() ?? $entry->getCreatedAt())->format(DATE_ATOM),
+            occurredAt: DateFormatter::toApi($entry->getOccurredAt() ?? $entry->getCreatedAt()),
             paymentMethod: $entry->getPaymentMethod(),
             status: $this->buildStatus($entry),
             isCorrection: $entry->isCorrection(),
             correctedEntryUuid: $this->previousUuid($entry),
             previousAmount: $this->previousAmount($entry),
-            // canReverse: $isLasEntry,
-            // canCorrect: $isLasEntry, // 'd M Y H:i:s'
             canReverse: $entry->canBeReversed(),
             canCorrect: $entry->canCorrect(),
             icon: $this->buildIcon($entry),
@@ -106,12 +105,12 @@ final class CustomerLedgerTimelineBuilder
         if ($entry->isCorrection()) {
             return match ($entry->getType()) {
                 LedgerTypeEnum::DEBT => sprintf(
-                    'Dette corrigée (%d → %d)',
+                    'Dette corrigée (%s → %s)',
                     $entry->getCorrectedEntry()->getAmountFormat(),
                     $entry->getAmountFormat(),
                 ),
                 LedgerTypeEnum::PAYMENT => sprintf(
-                    'Paiement corrigé (%d → %d)',
+                    'Paiement corrigé (%s → %s)',
                     $entry->getCorrectedEntry()->getAmountFormat(),
                     $entry->getAmountFormat(),
                 ),

@@ -67,7 +67,7 @@ final readonly class UndoCorrectionService
                             'Rétablissement après annulation de correction (%s)',
                             $original->getAmountFormat(),
                         ),
-                        occurredAt: new \DateTimeImmutable()->format(DATE_ATOM),
+                        occurredAt: (new \DateTimeImmutable())->format(DATE_ATOM),
                     ),
                 ),
                 LedgerTypeEnum::PAYMENT => $this->createPaymentService->create(
@@ -80,7 +80,7 @@ final readonly class UndoCorrectionService
                             'Rétablissement après annulation de correction (%s)',
                             $original->getAmountFormat(),
                         ),
-                        occurredAt: new \DateTimeImmutable()->format(DATE_ATOM),
+                        occurredAt: (new \DateTimeImmutable())->format(DATE_ATOM),
                     ),
                 ),
             };

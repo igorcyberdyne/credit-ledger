@@ -8,6 +8,7 @@ use App\Dto\Response\Domain\Ledger\LedgerEntryResponse;
 use App\Entity\Customer;
 use App\Entity\LedgerEntry;
 use App\Enum\LedgerTypeEnum;
+use App\Tools\DateFormatter;
 
 final readonly class LedgerEntryMapper
 {
@@ -19,7 +20,7 @@ final readonly class LedgerEntryMapper
             type: $entry->getType()->value,
             amount: $entry->getAmountDecimal(),
             description: $entry->getDescription(),
-            occurredAt: $entry->getOccurredAt()?->format(DATE_ATOM),
+            occurredAt: DateFormatter::toApi($entry->getOccurredAt()),
             paymentMethod: $entry->getPaymentMethod(),
         );
     }
@@ -31,7 +32,7 @@ final readonly class LedgerEntryMapper
         Customer $customer,
         CreateDebtCommand $command,
     ): LedgerEntry {
-        return new LedgerEntry()->setCustomer($customer)
+        return (new LedgerEntry())->setCustomer($customer)
             ->setType(LedgerTypeEnum::DEBT)
             ->setAmountInCents($command->amountInCents)
             ->setDescription($command->description)
@@ -45,8 +46,7 @@ final readonly class LedgerEntryMapper
         Customer $customer,
         CreatePaymentCommand $command,
     ): LedgerEntry {
-        return new LedgerEntry()
-            ->setCustomer($customer)
+        return (new LedgerEntry())->setCustomer($customer)
             ->setType(LedgerTypeEnum::PAYMENT)
             ->setAmountInCents($command->amountInCents)
             ->setPaymentMethod($command->paymentMethod)

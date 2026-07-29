@@ -12,7 +12,7 @@ final readonly class LedgerValidator
     public function validateDebt(
         CreateDebtCommand $command,
     ): void {
-        new InvalidAmountException()->assertAmountIsPositive(
+        (new InvalidAmountException())->assertAmountIsPositive(
             $command->amountInCents
         );
     }
@@ -21,7 +21,7 @@ final readonly class LedgerValidator
         int $customerBalanceInCents,
         CreatePaymentCommand $command,
     ): void {
-        new InvalidAmountException()->assertAmountIsPositive(
+        (new InvalidAmountException())->assertAmountIsPositive(
             $command->amountInCents
         );
 

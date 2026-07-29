@@ -83,7 +83,7 @@ trait BasicTestTrait
     protected function wrapInRollback(callable $callable): void
     {
         try {
-            $this->getEntityManager()->wrapInTransaction(function (EntityManagerInterface $entityManager) use ($callable) {
+            $this->getEntityManager()->wrapInTransaction(function (EntityManagerInterface $entityManager) use ($callable): void {
                 $entityManager->commit();
                 $callable($entityManager);
 
