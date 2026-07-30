@@ -4,13 +4,16 @@ namespace App\Entity;
 
 use App\Entity\Abstracts\BaseEntitySoftDeletable;
 use App\Enum\CurrencyEnum;
+use App\Enum\ShopStatusEnum;
+use App\Enum\ShopTypeEnum;
+use App\Repository\ShopRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: ShopRepository::class)]
 #[ORM\Index(name: 'idx_shop_slug', columns: ['slug'])]
 class Shop extends BaseEntitySoftDeletable
 {
@@ -86,6 +89,12 @@ class Shop extends BaseEntitySoftDeletable
         orphanRemoval: false
     )]
     private Collection $ledgerEntries;
+
+    #[ORM\Column(enumType: ShopStatusEnum::class)]
+    private ?ShopStatusEnum $status = ShopStatusEnum::ACTIVE;
+
+    #[ORM\Column(enumType: ShopTypeEnum::class)]
+    private ?ShopTypeEnum $type = ShopTypeEnum::BUSINESS;
 
     public function __construct()
     {
@@ -312,6 +321,30 @@ class Shop extends BaseEntitySoftDeletable
     public function setCurrency(CurrencyEnum $currency): static
     {
         $this->currency = $currency;
+
+        return $this;
+    }
+
+    public function getStatus(): ?ShopStatusEnum
+    {
+        return $this->status;
+    }
+
+    public function setStatus(ShopStatusEnum $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getType(): ?ShopTypeEnum
+    {
+        return $this->type;
+    }
+
+    public function setType(ShopTypeEnum $type): static
+    {
+        $this->type = $type;
 
         return $this;
     }

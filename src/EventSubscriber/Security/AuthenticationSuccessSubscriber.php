@@ -7,6 +7,7 @@ namespace App\EventSubscriber\Security;
 use App\Dto\Response\Infra\ApiSuccessResponse;
 use App\Dto\Response\Security\LoginResponse;
 use App\Entity\User;
+use App\Mapper\ShopMapper;
 use App\Mapper\UserMapper;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Events;
@@ -45,7 +46,8 @@ final readonly class AuthenticationSuccessSubscriber implements EventSubscriberI
             $data['token'],
             $data['refresh_token'],
             $this->jwtTtl,
-            UserMapper::toResponse($user)
+            UserMapper::toResponse($user),
+            ShopMapper::toResponse($user->getShop()),
         );
 
         $response = json_decode(
