@@ -14,7 +14,6 @@ use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ShopRepository::class)]
-#[ORM\Index(name: 'idx_shop_slug', columns: ['slug'])]
 class Shop extends BaseEntitySoftDeletable
 {
     #[ORM\Column(type: 'uuid', unique: true)]
@@ -24,11 +23,6 @@ class Shop extends BaseEntitySoftDeletable
     #[Assert\Length(max: 120)]
     #[ORM\Column(length: 120)]
     private string $name;
-
-    #[Assert\NotBlank]
-    #[Assert\Length(max: 120)]
-    #[ORM\Column(length: 120, unique: true)]
-    private string $slug;
 
     #[Assert\Length(max: 255)]
     #[ORM\Column(length: 255, nullable: true)]
@@ -123,18 +117,6 @@ class Shop extends BaseEntitySoftDeletable
     public function setName(string $name): static
     {
         $this->name = $name;
-
-        return $this;
-    }
-
-    public function getSlug(): ?string
-    {
-        return $this->slug;
-    }
-
-    public function setSlug(string $slug): static
-    {
-        $this->slug = $slug;
 
         return $this;
     }
