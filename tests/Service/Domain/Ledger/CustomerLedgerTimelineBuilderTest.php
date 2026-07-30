@@ -38,7 +38,7 @@ class CustomerLedgerTimelineBuilderTest extends TestCase
 
         self::assertSame('ACTIVE', $timeline[0]->status);
 
-        self::assertSame(new Money(10000)->decimal(), $timeline[0]->amount);
+        self::assertSame((new Money(10000))->decimal(), $timeline[0]->amount);
 
         self::assertFalse($timeline[0]->isCorrection);
     }
@@ -114,7 +114,7 @@ class CustomerLedgerTimelineBuilderTest extends TestCase
         );
 
         self::assertSame(
-            new Money(10000)->decimal(),
+            (new Money(10000))->decimal(),
             $timeline[1]->previousAmount,
         );
     }
@@ -168,7 +168,7 @@ class CustomerLedgerTimelineBuilderTest extends TestCase
         $customer = new Customer();
         $customer->setShop($this->shop);
 
-        return new LedgerEntry()
+        return (new LedgerEntry())
             ->setCustomer($customer)
             ->setShop($this->shop)
             ->setType(LedgerTypeEnum::DEBT)
@@ -181,7 +181,7 @@ class CustomerLedgerTimelineBuilderTest extends TestCase
         $customer = new Customer();
         $customer->setShop($this->shop);
 
-        return new LedgerEntry()
+        return (new LedgerEntry())
             ->setCustomer($customer)
             ->setShop($this->shop)
             ->setType(LedgerTypeEnum::PAYMENT)

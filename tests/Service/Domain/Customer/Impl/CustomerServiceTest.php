@@ -122,7 +122,7 @@ class CustomerServiceTest extends TestCase
                 ->with($command->phone, $shop)
                 ->willReturn($customer);
 
-            $updateCommand = new CustomerMapper()->fromCreateCustomerCommandToUpdateCustomerCommand($command);
+            $updateCommand = (new CustomerMapper())->fromCreateCustomerCommandToUpdateCustomerCommand($command);
             $this->customerMapper
                 ->expects(self::once())
                 ->method('fromCreateCustomerCommandToUpdateCustomerCommand')
@@ -173,7 +173,7 @@ class CustomerServiceTest extends TestCase
             ->expects(self::once())
             ->method('flush');
 
-        $expectedCustomer = new CustomerMapper()->toResponse($customer);
+        $expectedCustomer = (new CustomerMapper())->toResponse($customer);
         $this->customerMapper
             ->expects(self::once())
             ->method('toResponse')

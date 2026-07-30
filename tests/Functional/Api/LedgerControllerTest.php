@@ -195,7 +195,7 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
                     'customer' => $customer,
                     'amountInCents' => 1590,
                     'description' => 'Description',
-                    'occurredAt' => new \DateTimeImmutable('2026-07-13T12:14:30+02:00'),
+                    'occurredAt' => new \DateTimeImmutable('2026-07-13T12:14:30'),
                 ])
                 ->create();
 
@@ -211,7 +211,7 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
                     'type' => 'DEBT',
                     'description' => 'Description',
                     'amount' => '15.90',
-                    'occurredAt' => '2026-07-13T12:14:30+02:00',
+                    'occurredAt' => '2026-07-13T12:14:30+00:00',
                 ],
                 $response->apiSuccessResponse->data
             );
@@ -398,7 +398,7 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
             $json = $this->createDebt($customer, 2500);
 
             self::assertSame(
-                new Money(2500)->decimal(),
+                (new Money(2500))->decimal(),
                 $json['amount'],
             );
             self::assertSame(
@@ -666,7 +666,7 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
             $this->createDebt(
                 $customer,
                 1200,
-                callback: function () {
+                callback: function (): void {
                     $this->assertNotFound();
                 }
             );
@@ -674,7 +674,7 @@ final class LedgerControllerTest extends AuthenticatedApiTestCase
             $this->createPayment(
                 $customer,
                 1200,
-                callback: function () {
+                callback: function (): void {
                     $this->assertNotFound();
                 }
             );

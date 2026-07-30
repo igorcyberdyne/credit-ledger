@@ -303,7 +303,6 @@ build-with-dump:
 	@$(MAKE) migration
 	@$(MAKE) migrate
 	@$(MAKE) import-dump
-	@$(MAKE) anonymize-database
 	@$(MAKE) migrations-remove
 	@$(MAKE) cache-clear
 
@@ -398,7 +397,7 @@ rebuild: clean build up
 composer-install:
 	@echo "📦 Installation des dépendances PHP..."
 	$(DC) exec $(PHP_CONTAINER) composer install --no-interaction --prefer-dist
-	# $(DC) exec $(PHP_CONTAINER) php vendor/bin/requirements-checke
+	# $(DC) exec $(PHP_CONTAINER) php vendor/bin/requirements-check
 
 composer-install-prod:
 	@echo "📦 Installation des dépendances PHP pour prod..."

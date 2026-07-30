@@ -41,12 +41,17 @@ final readonly class Money
 
     public function format(): string
     {
-        return sprintf('%s %s', number_format(
-            $this->amountInCents / 100,
+        $decimal = sprintf('%s', number_format(
+            $this->decimal(),
             2,
             ',',
             ' '
-        ), $this->currencyEnum->symbol());
+        ));
+
+        return sprintf('%s %s',
+            $decimal,
+            $this->currencyEnum->symbol()
+        );
     }
 
     public function add(self $money): self

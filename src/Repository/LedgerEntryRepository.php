@@ -6,6 +6,7 @@ use App\Entity\Customer;
 use App\Entity\LedgerEntry;
 use App\Entity\Shop;
 use App\Enum\LedgerTypeEnum;
+use App\Tools\DateFormatter;
 use App\ValueObject\CustomerBalance;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
@@ -127,12 +128,14 @@ class LedgerEntryRepository extends ServiceEntityRepository
             $result = [];
         }
 
+        $lastDate = empty($result['lastDate']) ? null : $result['lastDate'];
+
         return new CustomerBalance(
             balanceInCents: max(0, (int) $result['balance']),
             totalDebtInCents: (int) $result['totalDebt'],
             totalPaidInCents: (int) $result['totalPaid'],
             operations: (int) $result['operations'],
-            lastDate: empty($result['lastDate']) ? null : $result['lastDate'],
+            lastDate: DateFormatter::toApi($lastDate),
         );
     }
 

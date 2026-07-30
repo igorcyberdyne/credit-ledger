@@ -30,7 +30,7 @@ final class ShopFixtures extends BaseFixtures
         ];
 
         foreach ($shops as $index => $data) {
-            $shop = new Shop()
+            $shop = (new Shop())
                 ->setName($data['name'])
                 ->setSlug($data['slug'])
                 ->setAddress($data['address'])

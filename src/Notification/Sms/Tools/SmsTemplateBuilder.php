@@ -17,7 +17,7 @@ final readonly class SmsTemplateBuilder
 
     private function money(int $amountInCents, CurrencyEnum $currencyEnum): string
     {
-        return new Money($amountInCents, $currencyEnum)->format();
+        return (new Money($amountInCents, $currencyEnum))->format();
     }
 
     private function shopInfo(Shop $shop): string

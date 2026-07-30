@@ -102,7 +102,7 @@ readonly class CorrectLedgerEntryService
             'Correction%s : %s -> %s',
             !empty($ledgerEntry->getDescription()) ? "({$ledgerEntry->getDescription()})" : '',
             $ledgerEntry->getAmountFormat(),
-            new Money($command->amountInCents, $ledgerEntry->getShop()->getCurrency())->format(),
+            (new Money($command->amountInCents, $ledgerEntry->getShop()->getCurrency()))->format(),
         );
     }
 }

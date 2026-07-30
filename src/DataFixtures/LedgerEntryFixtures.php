@@ -65,7 +65,7 @@ final class LedgerEntryFixtures extends BaseFixtures implements DependentFixture
     {
         $amount = random_int(150, 2500);
 
-        $entry = new LedgerEntry()
+        $entry = (new LedgerEntry())
             ->setCustomer($customer)
             ->setShop($shop)
             ->setType(LedgerTypeEnum::DEBT)
@@ -91,7 +91,7 @@ final class LedgerEntryFixtures extends BaseFixtures implements DependentFixture
             PaymentMethodEnum::TRANSFER => 'Virement',
         };
 
-        $entry = new LedgerEntry()
+        $entry = (new LedgerEntry())
             ->setCustomer($customer)
             ->setShop($shop)
             ->setType(LedgerTypeEnum::PAYMENT)

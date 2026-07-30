@@ -24,8 +24,7 @@ readonly class CustomerMapper
     public function fromCreateCustomerCommand(
         CreateCustomerCommand $dto,
     ): Customer {
-        return new Customer()
-            ->setFirstname($dto->firstname)
+        return (new Customer())->setFirstname($dto->firstname)
             ->setLastname($dto->lastname)
             ->setPhone($dto->phone)
             ->setNote($dto->note);

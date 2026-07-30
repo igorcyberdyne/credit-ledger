@@ -6,7 +6,6 @@ use App\Dto\Criteria\Customer\PaginationCriteria;
 use App\Dto\Response\Domain\Ledger\CustomerLedgerResponse;
 use App\Dto\Response\Domain\PaginationMetaResponse;
 use App\Entity\Shop;
-use App\Mapper\LedgerEntryMapper;
 use App\Repository\LedgerEntryRepository;
 use App\Service\Domain\Customer\Contracts\GetCustomerServiceInterface;
 use App\Service\Domain\Customer\Impl\CustomerBalanceService;
@@ -17,7 +16,6 @@ readonly class GetCustomerLedgerService
 {
     public function __construct(
         private LedgerEntryRepository $ledgerRepository,
-        private LedgerEntryMapper $ledgerMapper,
         private CustomerBalanceService $customerBalanceService,
         private PaginatorInterface $paginator,
         private GetCustomerServiceInterface $getCustomerService,
