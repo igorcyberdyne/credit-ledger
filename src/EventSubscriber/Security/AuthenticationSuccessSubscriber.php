@@ -5,13 +5,10 @@ declare(strict_types=1);
 namespace App\EventSubscriber\Security;
 
 use App\Dto\Response\Infra\ApiSuccessResponse;
-use App\Dto\Response\Security\LoginResponse;
 use App\Entity\User;
-use App\Mapper\ShopMapper;
-use App\Mapper\UserMapper;
+use App\Service\Security\AuthenticationResponseFactory;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Events;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -19,9 +16,8 @@ use Symfony\Component\Serializer\SerializerInterface;
 final readonly class AuthenticationSuccessSubscriber implements EventSubscriberInterface
 {
     public function __construct(
-        #[Autowire('%app.jwt_ttl%')]
-        private int $jwtTtl,
         private SerializerInterface $serializer,
+        private AuthenticationResponseFactory $factory,
     ) {
     }
 
@@ -42,17 +38,15 @@ final readonly class AuthenticationSuccessSubscriber implements EventSubscriberI
 
         $data = $event->getData();
 
-        $dto = new LoginResponse(
-            $data['token'],
-            $data['refresh_token'],
-            $this->jwtTtl,
-            UserMapper::toResponse($user),
-            ShopMapper::toResponse($user->getShop()),
-        );
-
         $response = json_decode(
             $this->serializer->serialize(
-                new ApiSuccessResponse($dto),
+                new ApiSuccessResponse(
+                    $this->factory->create(
+                        $user,
+                        $data['token'],
+                        $data['refresh_token'],
+                    )
+                ),
                 'json',
                 ['skip_null_values' => true]
             ),
