@@ -27,6 +27,8 @@ final class DashboardControllerTest extends AuthenticatedApiTestCase
             $json = $json->apiSuccessResponse->data;
 
             self::assertNotEmpty($json['shop']);
+            self::assertNotEmpty($json['shop']['uuid']);
+            unset($json['shop']['uuid']);
             self::assertEquals(
                 [
                     'name' => $this->shop->getName(),
