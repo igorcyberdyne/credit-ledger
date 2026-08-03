@@ -7,6 +7,7 @@ use App\Enum\CurrencyEnum;
 class ShopResponse
 {
     public function __construct(
+        public string $uuid,
         public string $name,
         public ?string $address,
         public ?string $postalCode,

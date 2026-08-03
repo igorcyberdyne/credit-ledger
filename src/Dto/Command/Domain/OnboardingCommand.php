@@ -5,6 +5,7 @@ namespace App\Dto\Command\Domain;
 final readonly class OnboardingCommand
 {
     public function __construct(
+        // Shop fields
         public string $shopName,
         public string $address,
         public string $postalCode,
@@ -14,6 +15,7 @@ final readonly class OnboardingCommand
         public ?string $currency,
         public ?string $timezone,
 
+        // User fields
         public string $firstname,
         public ?string $lastname,
         public string $email,
