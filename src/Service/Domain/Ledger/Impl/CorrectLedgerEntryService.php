@@ -40,6 +40,15 @@ readonly class CorrectLedgerEntryService
             throw new LedgerEntryCannotBeReversedException('Cette écriture ne peut pas être annulée.');
         }
 
+        // Update only description
+        if ($command->description != $ledgerEntry->getDescription() && $ledgerEntry->getAmountInCents() == $command->amountInCents) {
+            $ledgerEntry->setDescription($command->description);
+
+            $this->entityManager->flush();
+
+            return $this->ledgerEntryMapper->toResponse($ledgerEntry);
+        }
+
         return $this->entityManager->wrapInTransaction(
             function () use (
                 $shop,
