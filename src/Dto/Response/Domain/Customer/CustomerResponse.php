@@ -9,6 +9,7 @@ class CustomerResponse
         public string $firstname,
         public ?string $lastname,
         public ?string $phone,
+        public ?string $note,
         public ?CustomerBalanceResponse $balance = null,
     ) {
     }

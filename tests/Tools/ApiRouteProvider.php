@@ -100,6 +100,7 @@ final readonly class ApiRouteProvider
 
         if (\in_array($name, [
             'api_login_check',
+            'api_onboarding',
             'gesdinet_jwt_refresh_token',
             'lexik_jwt_authentication_token',
             'lexik_jwt_authentication_refresh_token',

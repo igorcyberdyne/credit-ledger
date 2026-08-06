@@ -11,6 +11,7 @@ final readonly class ShopMapper
         Shop $shop,
     ): ShopResponse {
         return new ShopResponse(
+            uuid: $shop->getUuid()->toRfc4122(),
             name: $shop->getName(),
             address: $shop->getAddress(),
             postalCode: $shop->getPostalCode(),
