@@ -34,7 +34,6 @@ readonly class GetDashboardService
             totalDebtInCents: $customerStatistics['totalDebtInCents'],
             todayDebtInCents: $ledgerStatistics['todayDebtInCents'],
             todayPaymentsInCents: $ledgerStatistics['todayPaymentsInCents'],
-            shop: ShopMapper::toResponse($shop),
         );
     }
 }

@@ -17,7 +17,6 @@ final readonly class DashboardResponse
         public int $totalDebtInCents,
         public int $todayDebtInCents,
         public int $todayPaymentsInCents,
-        public ShopResponse $shop,
     ) {
     }
 }
