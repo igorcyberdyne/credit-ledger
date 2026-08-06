@@ -71,10 +71,13 @@ final class CustomerControllerTest extends AuthenticatedApiTestCase
                     'firstname' => 'Jean',
                     'lastname' => 'Dupont',
                     'phone' => '0600000000',
+                    'note' => 'Good customer',
                 ]
             );
 
             $this->assertCreated();
+
+            self::assertNotEmpty($response->apiSuccessResponse->data['uuid']);
 
             self::assertEquals(
                 'Jean',
@@ -84,6 +87,23 @@ final class CustomerControllerTest extends AuthenticatedApiTestCase
             self::assertEquals(
                 0,
                 $response->apiSuccessResponse->data['balanceInCents']
+            );
+
+            self::assertEquals(
+                [
+                    'uuid' => $response->apiSuccessResponse->data['uuid'],
+                    'firstname' => 'Jean',
+                    'lastname' => 'Dupont',
+                    'phone' => '0600000000',
+                    'note' => 'Good customer',
+                    'balance' => [
+                        'balanceInCents' => 0,
+                        'totalDebtInCents' => 0,
+                        'totalPaidInCents' => 0,
+                        'operations' => 0,
+                    ],
+                ],
+                $response->apiSuccessResponse->data
             );
         });
     }
@@ -105,14 +125,32 @@ final class CustomerControllerTest extends AuthenticatedApiTestCase
                     'firstname' => 'Paul',
                     'lastname' => 'Martin',
                     'phone' => '0700000000',
+                    'note' => 'Good customer updated',
                 ]
             );
 
             $this->assertOk();
 
+            self::assertNotEmpty($response->apiSuccessResponse->data['uuid']);
             self::assertEquals(
                 'Paul',
                 $response->apiSuccessResponse->data['firstname']
+            );
+            self::assertEquals(
+                [
+                    'uuid' => $response->apiSuccessResponse->data['uuid'],
+                    'firstname' => 'Paul',
+                    'lastname' => 'Martin',
+                    'phone' => '0700000000',
+                    'note' => 'Good customer updated',
+                    'balance' => [
+                        'balanceInCents' => 0,
+                        'totalDebtInCents' => 0,
+                        'totalPaidInCents' => 0,
+                        'operations' => 0,
+                    ],
+                ],
+                $response->apiSuccessResponse->data
             );
         });
     }

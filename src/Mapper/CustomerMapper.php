@@ -50,6 +50,7 @@ readonly class CustomerMapper
             firstname: $customer->getFirstname(),
             lastname: $customer->getLastname(),
             phone: $customer->getPhone(),
+            note: $customer->getNote(),
             balance: $customerBalanceResponse,
         );
     }

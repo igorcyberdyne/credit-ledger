@@ -3,18 +3,59 @@
 namespace App\Tools;
 
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Stopwatch\Stopwatch;
 
-final readonly class TaskExecutor
+class TaskExecutor implements TaskExecutorInterface
 {
+    private string $taskName;
+    private \Closure $task;
+    private array $context = [];
+    private string $category = 'app';
+    private bool $enableTaskExecutor;
+
     public function __construct(
-        private LoggerInterface $logger,
-        private Stopwatch $stopwatch,
+        private readonly LoggerInterface $logger,
+        private readonly Stopwatch $stopwatch,
+        #[Autowire('%app.enable_task_executor%')]
+        public readonly int $defaultEnableTaskExecutor,
     ) {
+        $this->enableTaskExecutor = 1 === $defaultEnableTaskExecutor;
     }
 
     /**
-     * Exécute un callable en journalisant son début, sa fin et ses éventuelles erreurs.
+     * Configure un callable en journalisant son début, sa fin et ses éventuelles erreurs.
+     *
+     * @template T
+     *
+     * @param array<string, mixed> $context
+     * @param string|null          $category catégorie affichée dans la timeline du profiler Symfony
+     */
+    public function configure(
+        \Closure $task,
+        string $taskName,
+        ?array $context = null,
+        ?string $category = null,
+    ): TaskExecutor {
+        $taskName = basename(str_replace('\\', '/', $taskName));
+
+        $this->taskName = $taskName;
+        $this->task = $task;
+        $this->context = $context ?? $this->context;
+        $this->category = $category ?? $this->category;
+
+        return $this;
+    }
+
+    public function setEnableTaskExecutor(bool $enableTaskExecutor): TaskExecutor
+    {
+        $this->enableTaskExecutor = $enableTaskExecutor;
+
+        return $this;
+    }
+
+    /**
+     * Exécute un callable.
      *
      * Le Stopwatch alimente la timeline du profiler Symfony (dev),
      * tandis que microtime() garantit une mesure fiable de la durée
@@ -22,29 +63,29 @@ final readonly class TaskExecutor
      *
      * @template T
      *
-     * @param callable(): T        $task
-     * @param array<string, mixed> $context
-     * @param string               $category catégorie affichée dans la timeline du profiler Symfony
-     *
      * @throws \Throwable relance systématiquement l'exception d'origine après journalisation
      */
-    public function run(string $taskName, callable $task, array $context = [], string $category = 'app'): mixed
+    public function execute(): mixed
     {
-        $this->logger->info(sprintf('[%s] Démarrage', $taskName), $context);
+        if (!$this->enableTaskExecutor) {
+            return null;
+        }
+
+        $this->logger->info(sprintf('[%s] Démarrage', $this->taskName), $this->context);
 
         $startedAt = microtime(true);
         $startMemory = memory_get_usage(true);
 
-        $event = $this->stopwatch->start($taskName, $category);
+        $event = $this->stopwatch->start($this->taskName, $this->category);
 
         try {
-            $result = $task();
+            $result = call_user_func($this->task);
 
             $event->stop();
 
             $this->logger->info(
-                sprintf('[%s] Terminé avec succès (%s)', $taskName, $this->formatMetrics($startedAt, $startMemory)),
-                $context
+                sprintf('[%s] Terminé avec succès (%s)', $this->taskName, $this->formatMetrics($startedAt, $startMemory)),
+                $this->context
             );
 
             return $result;
@@ -56,12 +97,12 @@ final readonly class TaskExecutor
             $this->logger->error(
                 sprintf(
                     '[%s] Échec après %s : %s',
-                    $taskName,
+                    $this->taskName,
                     $this->formatMetrics($startedAt, $startMemory),
                     $exception->getMessage()
                 ),
                 [
-                    ...$context,
+                    ...$this->context,
                     'exception' => $exception::class,
                     'message' => $exception->getMessage(),
                     'trace' => $exception->getTraceAsString(),

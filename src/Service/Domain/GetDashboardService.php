@@ -4,7 +4,6 @@ namespace App\Service\Domain;
 
 use App\Dto\Response\Domain\Dashboard\DashboardResponse;
 use App\Entity\Shop;
-use App\Mapper\ShopMapper;
 use App\Repository\CustomerRepository;
 use App\Repository\LedgerEntryRepository;
 
