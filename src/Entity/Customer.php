@@ -220,4 +220,11 @@ class Customer extends BaseEntitySoftDeletable implements BlameableInterface
 
         return $this;
     }
+
+    public function reactive(): static
+    {
+        $this->setDeletedAt(null)->setDeletedBy(null);
+
+        return $this;
+    }
 }

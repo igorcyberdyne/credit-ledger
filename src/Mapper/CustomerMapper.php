@@ -30,7 +30,7 @@ readonly class CustomerMapper
             ->setNote($dto->note);
     }
 
-    public function updateEntity(
+    public function mapEntityFromUpdateCustomerCommand(
         Customer $customer,
         UpdateCustomerCommand $command,
     ): Customer {

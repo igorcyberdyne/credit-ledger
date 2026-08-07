@@ -58,17 +58,15 @@ readonly class CustomerService implements CustomerServiceInterface
                                 throw new CustomerNotFoundException();
                             }
 
-                            $reactivatedCustomer = $this->customerMapper->updateEntity(
+                            $customerToReactive = $this->customerMapper->mapEntityFromUpdateCustomerCommand(
                                 $customer,
                                 $this->customerMapper->fromCreateCustomerCommandToUpdateCustomerCommand($command),
                             );
-                            $reactivatedCustomer
-                                ->setDeletedAt(null)
-                                ->setDeletedBy(null);
+                            $customerToReactive->reactive();
 
                             $this->entityManager->flush();
 
-                            return $this->customerMapper->toResponse($reactivatedCustomer, $this->customerBalanceService->getStatistics($reactivatedCustomer));
+                            return $this->customerMapper->toResponse($customerToReactive, $this->customerBalanceService->getStatistics($customerToReactive));
                         } catch (CustomerNotFoundException) {
                         } finally {
                             $filters->enable('softdeleteable');
@@ -116,7 +114,7 @@ readonly class CustomerService implements CustomerServiceInterface
 
                     $this->customerValidator->validateUpdate($customer, $command);
 
-                    $customer = $this->customerMapper->updateEntity($customer, $command);
+                    $customer = $this->customerMapper->mapEntityFromUpdateCustomerCommand($customer, $command);
 
                     $this->entityManager->flush();
 

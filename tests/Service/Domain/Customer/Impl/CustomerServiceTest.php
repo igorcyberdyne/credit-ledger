@@ -138,20 +138,13 @@ class CustomerServiceTest extends BasicTestCase
 
             $this->customerMapper
                 ->expects(self::once())
-                ->method('updateEntity')
+                ->method('mapEntityFromUpdateCustomerCommand')
                 ->with($customer, $updateCommand)
                 ->willReturn($customer);
 
             $customer
                 ->expects(self::once())
-                ->method('setDeletedAt')
-                ->with(null)
-                ->willReturnSelf();
-
-            $customer
-                ->expects(self::once())
-                ->method('setDeletedBy')
-                ->with(null)
+                ->method('reactive')
                 ->willReturnSelf();
         } else {
             $this->validator
