@@ -18,4 +18,13 @@ final class DateFormatter
             ?->setTimezone(new \DateTimeZone('UTC'))
             ->format(\DateTimeInterface::ATOM);
     }
+
+    public static function fromApi(?string $date): ?\DateTimeImmutable
+    {
+        try {
+            return new \DateTimeImmutable($date);
+        } catch (\Exception) {
+            return null;
+        }
+    }
 }

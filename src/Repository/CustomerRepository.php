@@ -67,7 +67,7 @@ class CustomerRepository extends ServiceEntityRepository
         Shop $shop,
         ?string $query = null,
     ): QueryBuilder {
-        $subQuery = '
+        $balanceSubQuery = '
             CASE
                 WHEN l.type = :debt THEN l.amountInCents
                 WHEN l.type = :payment THEN -l.amountInCents
@@ -75,20 +75,41 @@ class CustomerRepository extends ServiceEntityRepository
             END
         ';
 
+        // all customers having entry in current date move to the top of list
+        $ledgerSubQuery = '
+            CASE
+                WHEN MAX(l.updatedAt) >= :todayStart AND MAX(l.updatedAt) < :tomorrowStart THEN MAX(l.updatedAt)
+                ELSE 0
+            END
+        ';
+
         $qb = $this
             ->createQueryBuilder('c')
             ->select('c')
-            ->addSelect('MAX(l.createdAt) AS HIDDEN lastLedgerAt')
-            ->addSelect(sprintf('COALESCE(SUM(%s),0) AS HIDDEN balance', $subQuery))
+            ->addSelect('MAX(l.updatedAt) AS HIDDEN lastLedgerAt')
+            ->addSelect(sprintf('COALESCE(SUM(%s),0) AS HIDDEN balance', $balanceSubQuery))
+            ->addSelect(sprintf('COALESCE(%s,0) AS HIDDEN newLedger', $ledgerSubQuery))
             ->leftJoin('c.ledgerEntries', 'l')
             ->where('c.shop = :shop')
             ->setParameter('shop', $shop)
             ->setParameter('debt', LedgerTypeEnum::DEBT)
             ->setParameter('payment', LedgerTypeEnum::PAYMENT)
             ->groupBy('c.id')
+            ->addOrderBy('newLedger', 'DESC')
             ->addOrderBy('balance', 'DESC')
             ->addOrderBy('lastLedgerAt', 'DESC')
             ->addOrderBy('c.id', 'DESC');
+
+        try {
+            $todayStart = new \DateTimeImmutable('today');
+            $tomorrowStart = $todayStart->modify('+1 day');
+
+            $qb
+                ->setParameter('todayStart', $todayStart)
+                ->setParameter('tomorrowStart', $tomorrowStart);
+        } catch (\Exception) {
+
+        }
 
         if (!empty($query)) {
             $orStatements = $qb->expr()->orX();
