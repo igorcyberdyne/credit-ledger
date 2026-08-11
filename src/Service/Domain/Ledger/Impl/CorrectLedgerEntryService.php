@@ -41,7 +41,6 @@ readonly class CorrectLedgerEntryService
             throw new LedgerEntryCannotBeReversedException('Cette écriture ne peut pas être annulée.');
         }
 
-
         if ($command->description != $ledgerEntry->getDescription()) {
             $ledgerEntry->setDescription($command->description);
         }

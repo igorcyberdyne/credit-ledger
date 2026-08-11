@@ -75,20 +75,11 @@ class CustomerRepository extends ServiceEntityRepository
             END
         ';
 
-        // all customers having entry in current date move to the top of list
-        $ledgerSubQuery = '
-            CASE
-                WHEN MAX(l.updatedAt) >= :todayStart AND MAX(l.updatedAt) < :tomorrowStart THEN MAX(l.updatedAt)
-                ELSE 0
-            END
-        ';
-
         $qb = $this
             ->createQueryBuilder('c')
             ->select('c')
             ->addSelect('MAX(l.updatedAt) AS HIDDEN lastLedgerAt')
             ->addSelect(sprintf('COALESCE(SUM(%s),0) AS HIDDEN balance', $balanceSubQuery))
-            ->addSelect(sprintf('COALESCE(%s,0) AS HIDDEN newLedger', $ledgerSubQuery))
             ->leftJoin('c.ledgerEntries', 'l')
             ->where('c.shop = :shop')
             ->setParameter('shop', $shop)
@@ -104,11 +95,19 @@ class CustomerRepository extends ServiceEntityRepository
             $todayStart = new \DateTimeImmutable('today');
             $tomorrowStart = $todayStart->modify('+1 day');
 
+            // all customers having entry in current date move to the top of list
+            $ledgerSubQuery = '
+            CASE
+                WHEN MAX(l.updatedAt) >= :todayStart AND MAX(l.updatedAt) < :tomorrowStart THEN MAX(l.updatedAt)
+                ELSE 0
+            END
+        ';
+
             $qb
+                ->addSelect(sprintf('COALESCE(%s,0) AS HIDDEN newLedger', $ledgerSubQuery))
                 ->setParameter('todayStart', $todayStart)
                 ->setParameter('tomorrowStart', $tomorrowStart);
         } catch (\Exception) {
-
         }
 
         if (!empty($query)) {
