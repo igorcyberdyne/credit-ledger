@@ -85,11 +85,7 @@ class CustomerRepository extends ServiceEntityRepository
             ->setParameter('shop', $shop)
             ->setParameter('debt', LedgerTypeEnum::DEBT)
             ->setParameter('payment', LedgerTypeEnum::PAYMENT)
-            ->groupBy('c.id')
-            ->addOrderBy('newLedger', 'DESC')
-            ->addOrderBy('balance', 'DESC')
-            ->addOrderBy('lastLedgerAt', 'DESC')
-            ->addOrderBy('c.id', 'DESC');
+            ->groupBy('c.id');
 
         try {
             $todayStart = new \DateTimeImmutable('today');
@@ -97,16 +93,17 @@ class CustomerRepository extends ServiceEntityRepository
 
             // all customers having entry in current date move to the top of list
             $ledgerSubQuery = '
-            CASE
-                WHEN MAX(l.updatedAt) >= :todayStart AND MAX(l.updatedAt) < :tomorrowStart THEN MAX(l.updatedAt)
-                ELSE 0
-            END
-        ';
+                CASE
+                    WHEN MAX(l.updatedAt) >= :todayStart AND MAX(l.updatedAt) < :tomorrowStart THEN MAX(l.updatedAt)
+                    ELSE 0
+                END
+            ';
 
             $qb
                 ->addSelect(sprintf('COALESCE(%s,0) AS HIDDEN newLedger', $ledgerSubQuery))
                 ->setParameter('todayStart', $todayStart)
-                ->setParameter('tomorrowStart', $tomorrowStart);
+                ->setParameter('tomorrowStart', $tomorrowStart)
+                ->addOrderBy('newLedger', 'DESC');
         } catch (\Exception) {
         }
 
@@ -118,6 +115,11 @@ class CustomerRepository extends ServiceEntityRepository
 
             $qb->andWhere($orStatements);
         }
+
+        $qb
+            ->addOrderBy('balance', 'DESC')
+            ->addOrderBy('lastLedgerAt', 'DESC')
+            ->addOrderBy('c.id', 'DESC');
 
         return $qb;
     }
