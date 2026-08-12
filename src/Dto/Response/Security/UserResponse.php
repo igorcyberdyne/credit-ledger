@@ -9,6 +9,7 @@ final readonly class UserResponse
         public string $email,
         public string $firstName,
         public ?string $lastName = null,
+        public ?string $phone = null,
         public array $roles = [],
     ) {
     }

@@ -6,6 +6,7 @@ use App\Exception\Domain\BusinessException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class ApiRestExceptionListener extends AbstractExceptionListener
 {
@@ -16,7 +17,9 @@ class ApiRestExceptionListener extends AbstractExceptionListener
         $throwable = $this->event->getThrowable();
         $message = $throwable->getMessage();
 
-        if ($throwable instanceof BusinessException) {
+        if ($throwable instanceof UnprocessableEntityHttpException) {
+            $message = $throwable->getMessage();
+        } elseif ($throwable instanceof BusinessException) {
             $code = $throwable->getBusinessCode();
             $message = $throwable->getMessage();
             $details = $throwable->getDetails();
