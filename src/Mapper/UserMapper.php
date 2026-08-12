@@ -18,6 +18,7 @@ final readonly class UserMapper
             email: $user->getEmail(),
             firstName: $user->getFirstname(),
             lastName: $user->getLastname(),
+            phone: $user->getPhone(),
             roles: $user->getRoles(),
         );
     }
