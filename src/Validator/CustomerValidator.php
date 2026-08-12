@@ -9,7 +9,6 @@ use App\Entity\Shop;
 use App\Enum\CustomerStatusEnum;
 use App\Exception\Domain\Customer\CustomerAlreadyExistsException;
 use App\Exception\Domain\Customer\CustomerArchivedException;
-use App\Exception\Domain\Customer\CustomerMissingPhoneException;
 use App\Exception\Domain\Customer\CustomerNotFoundException;
 use App\Service\Domain\Customer\Contracts\GetCustomerServiceInterface;
 
@@ -48,12 +47,11 @@ readonly class CustomerValidator
         ?string $phone,
         ?Customer $ignore = null,
     ): void {
-        if (empty($phone)) {
-            throw new CustomerMissingPhoneException();
-        }
-
-        $phone = trim($phone);
+        $phone = trim($phone ?? '');
         $phone = str_replace(' ', '', $phone);
+        if (empty($phone)) {
+            return;
+        }
 
         try {
             $existing = $this->getCustomerService->getCustomerByPhoneAndShop($phone, $shop);

@@ -18,7 +18,6 @@ final class ShopFactory extends BaseFactory
     {
         return [
             'name' => self::faker()->company(),
-            'slug' => sprintf('%s-%s', self::faker()->slug(), uniqid()),
             'address' => self::faker()->address(),
             'postalCode' => self::faker()->postcode(),
             'city' => self::faker()->currencyCode(),

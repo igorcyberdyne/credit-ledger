@@ -66,7 +66,7 @@ final class CustomerLedgerTimelineBuilder
             type: $entry->getType()->value,
             amount: $entry->getAmountDecimal(),
             description: $this->buildDescription($entry),
-            occurredAt: DateFormatter::toApi($entry->getOccurredAt() ?? $entry->getCreatedAt()),
+            occurredAt: DateFormatter::toApi($entry->getOccurredAt() ?? $entry->getUpdatedAt()),
             paymentMethod: $entry->getPaymentMethod(),
             status: $this->buildStatus($entry),
             isCorrection: $entry->isCorrection(),

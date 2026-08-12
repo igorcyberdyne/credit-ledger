@@ -121,3 +121,13 @@ Authorization: Bearer {{Security.token}}
 {
 
 }
+
+### Onboarding shop
+POST {{baseUrl}}/api/onboarding
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{Security.token}}
+
+{
+
+}

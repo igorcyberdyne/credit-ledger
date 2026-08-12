@@ -2,6 +2,7 @@
 
 namespace App\Dto\Response\Security;
 
+use App\Dto\Response\Domain\ShopResponse;
 use Symfony\Component\Serializer\Attribute\SerializedName;
 
 final readonly class LoginResponse
@@ -12,6 +13,8 @@ final readonly class LoginResponse
         public int $expiresIn,
         #[SerializedName('user')]
         public UserResponse $userResponseDTO,
+        #[SerializedName('shop')]
+        public ShopResponse $shopResponse,
     ) {
     }
 }

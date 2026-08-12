@@ -30,7 +30,7 @@ readonly class CustomerMapper
             ->setNote($dto->note);
     }
 
-    public function updateEntity(
+    public function mapEntityFromUpdateCustomerCommand(
         Customer $customer,
         UpdateCustomerCommand $command,
     ): Customer {
@@ -50,6 +50,7 @@ readonly class CustomerMapper
             firstname: $customer->getFirstname(),
             lastname: $customer->getLastname(),
             phone: $customer->getPhone(),
+            note: $customer->getNote(),
             balance: $customerBalanceResponse,
         );
     }

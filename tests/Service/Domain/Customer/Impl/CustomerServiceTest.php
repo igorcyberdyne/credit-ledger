@@ -9,14 +9,15 @@ use App\Mapper\CustomerMapper;
 use App\Service\Domain\Customer\Contracts\GetCustomerServiceInterface;
 use App\Service\Domain\Customer\Impl\CustomerBalanceService;
 use App\Service\Domain\Customer\Impl\CustomerService;
+use App\Tests\Tools\BasicTestCase;
+use App\Tools\TaskExecutorInterface;
 use App\Validator\CustomerValidator;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\FilterCollection;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;
 
-class CustomerServiceTest extends TestCase
+class CustomerServiceTest extends BasicTestCase
 {
     private EntityManagerInterface $entityManager;
 
@@ -30,6 +31,8 @@ class CustomerServiceTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
+
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
 
         $this->validator = $this->createMock(CustomerValidator::class);
@@ -40,12 +43,16 @@ class CustomerServiceTest extends TestCase
 
         $this->getCustomerService = $this->createMock(GetCustomerServiceInterface::class);
 
+        /** @var TaskExecutorInterface $taskExecutor */
+        $taskExecutor = $this->getService(TaskExecutorInterface::class);
+
         $this->service = new CustomerService(
             entityManager: $this->entityManager,
             customerValidator: $this->validator,
             customerMapper: $this->customerMapper,
             customerBalanceService: $customerBalanceService,
-            getCustomerService: $this->getCustomerService
+            getCustomerService: $this->getCustomerService,
+            taskExecutor: $taskExecutor
         );
     }
 
@@ -131,20 +138,13 @@ class CustomerServiceTest extends TestCase
 
             $this->customerMapper
                 ->expects(self::once())
-                ->method('updateEntity')
+                ->method('mapEntityFromUpdateCustomerCommand')
                 ->with($customer, $updateCommand)
                 ->willReturn($customer);
 
             $customer
                 ->expects(self::once())
-                ->method('setDeletedAt')
-                ->with(null)
-                ->willReturnSelf();
-
-            $customer
-                ->expects(self::once())
-                ->method('setDeletedBy')
-                ->with(null)
+                ->method('reactive')
                 ->willReturnSelf();
         } else {
             $this->validator

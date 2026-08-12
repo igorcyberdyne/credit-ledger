@@ -2,3 +2,7 @@ services:
     _defaults:
         autowire: true
         autoconfigure: true
+
+    App\Service\Domain\Onboarding\OnboardingService:
+        class: App\Service\Domain\Onboarding\OnboardingService
+        public: true
