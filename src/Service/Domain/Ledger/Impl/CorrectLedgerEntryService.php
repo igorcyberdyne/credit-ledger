@@ -12,6 +12,7 @@ use App\Enum\LedgerTypeEnum;
 use App\Exception\Domain\Ledger\LedgerEntryCannotBeReversedException;
 use App\Mapper\LedgerEntryMapper;
 use App\Service\Domain\Ledger\Contracts\GetLedgerServiceInterface;
+use App\Tools\DateFormatter;
 use App\ValueObject\Money;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -40,10 +41,17 @@ readonly class CorrectLedgerEntryService
             throw new LedgerEntryCannotBeReversedException('Cette écriture ne peut pas être annulée.');
         }
 
-        // Update only description
-        if ($command->description != $ledgerEntry->getDescription() && $ledgerEntry->getAmountInCents() == $command->amountInCents) {
+        if ($command->description != $ledgerEntry->getDescription()) {
             $ledgerEntry->setDescription($command->description);
+        }
 
+        $fromMobile = DateFormatter::fromApi($command->occurredAt);
+        if (null !== $fromMobile) {
+            $ledgerEntry->setOccurredAt($fromMobile);
+        }
+
+        // Update description or occurredAt
+        if ($ledgerEntry->getAmountInCents() == $command->amountInCents) {
             $this->entityManager->flush();
 
             return $this->ledgerEntryMapper->toResponse($ledgerEntry);
